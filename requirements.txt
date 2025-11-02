@@ -1,0 +1,4 @@
+tqdm
+toml
+rich
+pyside6
