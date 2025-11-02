@@ -1,0 +1,3 @@
+{
+  "dependence": ["pyside6","pynput"]
+}
