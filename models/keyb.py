@@ -44,6 +44,9 @@ class keyb:
         self._auto_repeat_interval = 0.35
         # interval (s) within which sequential presses of the same key are combined into xN
         self._combine_interval = 1.2
+        
+        # 添加唯一ID生成器，确保每个按键事件都有唯一标识
+        self._next_id = 0
 
     def _on_press(self, key):
         try:
@@ -65,6 +68,10 @@ class keyb:
             self._last_press_time[k] = now
         except Exception:
             pass
+
+        # 生成唯一ID
+        current_id = self._next_id
+        self._next_id += 1
 
         # consolidate with last logical entry if same key and recent (combine into xN)
         try:

@@ -91,11 +91,17 @@ class KeybWindow(QWidget):
 
         # if changed, rebuild items preserving animation x where possible
         if new_snapshot != self._last_snapshot:
-            # map existing keys to items for re-use (match by key only so count updates don't re-trigger entry)
-            existing = { it.key: it for it in self._items }
+            # 使用键名和时间戳的组合作为唯一标识符，避免同名键的冲突
+            existing = {}
+            for it in self._items:
+                # 使用键名和时间戳的组合作为标识符
+                identifier = f"{it.key}_{it.ts}"
+                existing[identifier] = it
+            
             items = []
             for key, count, ts in new_snapshot:
-                itm = existing.get(key)
+                identifier = f"{key}_{ts}"
+                itm = existing.get(identifier)
                 if itm is None:
                     itm = KeyItem(key, count, ts)
                     # start beyond right edge to animate in

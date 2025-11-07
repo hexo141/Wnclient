@@ -300,7 +300,7 @@ class cmd:
             prompt_text.append("> ")
             user_input = self.console.input(prompt_text)
             
-            if user_input.lower() == 'exit':
+            if user_input.lower() == 'exit' or user_input.lower() == 'stop':
                 print("Exiting the command interface.")
                 for name, inst in list(self._running_models.items()):
                     try:
