@@ -17,3 +17,4 @@ class example:
     "dependence": ["pyside6","example"]
 }
 ```
+其中dependence是所需要的模块名，主程序启动时会让用户安装他
