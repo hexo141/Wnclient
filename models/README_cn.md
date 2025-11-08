@@ -11,3 +11,9 @@ class example:
 ```
 # 每个程序务必使用多线程，不得堵塞主线程
 # 以_为开头的模块不会被执行导入
+## JSON配置文件要求如下
+```json
+{
+    "dependence": ["pyside6","example"]
+}
+```
