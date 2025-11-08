@@ -15,3 +15,4 @@ How to use?
    python main.py
    ```
 4. enjoy
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/ce44c840-5742-445c-bf1c-8d6f9d87f1e9" />
