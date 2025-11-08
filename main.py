@@ -12,7 +12,7 @@ import os
 # PySide6 GUI 组件
 from PySide6.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, 
                                QProgressBar, QLabel, QFrame)
-from PySide6.QtCore import Qt, QTimer, QPropertyAnimation, QEasingCurve
+from PySide6.QtCore import Qt, QTimer, QPropertyAnimation, QEasingCurve, QPoint
 from PySide6.QtGui import QFont, QFontDatabase, QPixmap, QPainter, QPainterPath, QColor
 
 class RoundedPixmapLabel(QLabel):
@@ -65,7 +65,7 @@ class LoadingWindow(QWidget):
         self.setFixedSize(500, 120)
         
         # 加载自定义字体
-        font_id = QFontDatabase.addApplicationFont("./assets/AiDianFengYaHei（ShangYongMianFei）-2.ttf")
+        font_id = QFontDatabase.addApplicationFont("./assets/YEFONTColorFonts0831-Color1-2.ttf")
         if font_id != -1:
             font_family = QFontDatabase.applicationFontFamilies(font_id)[0]
             self.custom_font = QFont(font_family, 12)
@@ -118,7 +118,7 @@ class LoadingWindow(QWidget):
         # 进度文本
         self.progress_text = QLabel("0%")
         self.progress_text.setFont(self.custom_font)
-        self.progress_text.setStyleSheet("color: #cccccc; font-size: 14px; font-weight: bold;")
+        self.progress_text.setStyleSheet("color: #ffffff; font-size: 14px; font-weight: bold;")  # 改为白色
         self.progress_text.setFixedWidth(40)
         self.progress_text.setAlignment(Qt.AlignCenter)
         
@@ -128,7 +128,7 @@ class LoadingWindow(QWidget):
         # 当前模型标签
         self.current_model_label = QLabel("准备加载模型...")
         self.current_model_label.setFont(self.custom_font)
-        self.current_model_label.setStyleSheet("color: #aaaaaa; font-size: 12px;")
+        self.current_model_label.setStyleSheet("color: #ffffff; font-size: 12px;")  # 改为白色
         
         # 添加到内容布局
         content_layout.addWidget(title_label)
@@ -143,18 +143,69 @@ class LoadingWindow(QWidget):
     
     def setup_animation(self):
         # 创建进度条动画
-        self.animation = QPropertyAnimation(self.progress_bar, b"value")
-        self.animation.setEasingCurve(QEasingCurve.OutCubic)
-        self.animation.setDuration(300)
+        self.progress_animation = QPropertyAnimation(self.progress_bar, b"value")
+        self.progress_animation.setEasingCurve(QEasingCurve.OutCubic)
+        self.progress_animation.setDuration(300)
+        
+        # 创建窗口位置动画
+        self.position_animation = QPropertyAnimation(self, b"pos")
+        self.position_animation.setEasingCurve(QEasingCurve.OutCubic)  # 使用OutCubic实现先快后慢
+        self.position_animation.setDuration(400)  # 稍微缩短动画时间
+    
+    def showEvent(self, event):
+        """重写显示事件，添加入场动画"""
+        super().showEvent(event)
+        
+        # 获取屏幕尺寸和窗口尺寸
+        screen_geometry = QApplication.primaryScreen().availableGeometry()
+        window_size = self.size()
+        
+        # 计算中央位置
+        center_x = (screen_geometry.width() - window_size.width()) // 2
+        center_y = (screen_geometry.height() - window_size.height()) // 2
+        
+        # 计算底部位置（屏幕外）
+        bottom_x = center_x
+        bottom_y = screen_geometry.height()  # 屏幕底部
+        
+        # 设置初始位置在屏幕底部外
+        self.move(bottom_x, bottom_y)
+        
+        # 设置动画：从底部移动到中央
+        self.position_animation.setStartValue(QPoint(bottom_x, bottom_y))
+        self.position_animation.setEndValue(QPoint(center_x, center_y))
+        self.position_animation.start()
+    
+    def hide_with_animation(self):
+        """使用动画隐藏窗口"""
+        # 获取屏幕尺寸和窗口尺寸
+        screen_geometry = QApplication.primaryScreen().availableGeometry()
+        window_size = self.size()
+        
+        # 计算中央位置
+        center_x = (screen_geometry.width() - window_size.width()) // 2
+        center_y = (screen_geometry.height() - window_size.height()) // 2
+        
+        # 计算底部位置（屏幕外）
+        bottom_x = center_x
+        bottom_y = screen_geometry.height()  # 屏幕底部
+        
+        # 设置动画：从中央移动到底部
+        self.position_animation.setStartValue(QPoint(center_x, center_y))
+        self.position_animation.setEndValue(QPoint(bottom_x, bottom_y))
+        self.position_animation.start()
+        
+        # 动画完成后关闭窗口
+        self.position_animation.finished.connect(self.close)
     
     def update_progress(self, model_name, current, total):
         self.current_model = current
         self.current_model_label.setText(f"加载: {model_name}")
         
         # 更新进度条
-        self.animation.setStartValue(self.progress_bar.value())
-        self.animation.setEndValue(current)
-        self.animation.start()
+        self.progress_animation.setStartValue(self.progress_bar.value())
+        self.progress_animation.setEndValue(current)
+        self.progress_animation.start()
         
         # 更新进度文本
         progress_percent = int((current / total) * 100)
@@ -203,6 +254,11 @@ class cmd:
         # 确保窗口显示
         QApplication.processEvents()
         
+        # 添加短暂延迟，确保动画开始
+        QTimer.singleShot(50, lambda: self._load_models_after_delay(len_models))
+    
+    def _load_models_after_delay(self, len_models):
+        """延迟加载模型，确保动画已经开始"""
         for i in range(len_models):
             model_name = self.conf['models']['enabled'][i]
             
@@ -283,13 +339,13 @@ class cmd:
                 QApplication.processEvents()
                 continue
         
-        # 完成加载，关闭窗口
+        # 完成加载，使用动画关闭窗口
         self.loading_window.update_progress("完成", len_models, len_models)
         self.loading_window.current_model_label.setText("所有模型加载完成!")
         QApplication.processEvents()
         
-        # 延迟关闭窗口
-        QTimer.singleShot(800, self.loading_window.close)
+        # 延迟后使用动画隐藏窗口
+        QTimer.singleShot(800, self.loading_window.hide_with_animation)
     
     def cmd(self):
         # 原有cmd方法保持不变
@@ -318,6 +374,9 @@ class cmd:
                 isExit = True
             elif len(user_input.strip()) == 0:
                 continue
+            # 以下划线为开头的命令视为无效
+            elif user_input.lower().strip()[0] == "_":
+                print("Invalid command syntax.")
             else:
                 try:
                     mod = importlib.import_module(f"models.{user_input}")
