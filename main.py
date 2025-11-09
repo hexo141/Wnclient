@@ -364,7 +364,7 @@ class cmd:
                     except Exception as e:
                         self.console.print(f"[bold red]Failed to stop model {name}: {e}[/bold red]")
                         continue
-                    self.console.print(f"[bold red]Model {name} stopped and unloaded.[/bold red]")
+                    self.console.print(f"[bold red]Model [underline][white]{name}[/white][/underline] stopped and unloaded.[/bold red]")
                     if name in self.conf.get('models', {}).get('enabled', []):
                         try:
                             self.conf['models']['enabled'].remove(name)
