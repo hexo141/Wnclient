@@ -12,7 +12,7 @@ import os
 # PySide6 GUI 组件
 from PySide6.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, 
                                QProgressBar, QLabel, QFrame)
-from PySide6.QtCore import Qt, QTimer, QPropertyAnimation, QEasingCurve, QPoint
+from PySide6.QtCore import Qt, QTimer, QPropertyAnimation, QEasingCurve, QPoint, QThread, Signal
 from PySide6.QtGui import QFont, QFontDatabase, QPixmap, QPainter, QPainterPath, QColor
 
 class RoundedPixmapLabel(QLabel):
@@ -49,6 +49,101 @@ class RoundedPixmapLabel(QLabel):
         painter.end()
         
         return rounded
+
+class ModelLoaderThread(QThread):
+    """模型加载线程"""
+    progress_updated = Signal(str, int, int)  # 模型名, 当前进度, 总进度
+    loading_finished = Signal()  # 加载完成信号
+    
+    def __init__(self, conf):
+        super().__init__()
+        self.conf = conf
+        self._dep_status = {}
+        self._running_models = {}
+        
+    def run(self):
+        """线程主函数"""
+        len_models = len(self.conf['models']['enabled'])
+        
+        for i in range(len_models):
+            model_name = self.conf['models']['enabled'][i]
+            
+            # 发出进度更新信号
+            self.progress_updated.emit(model_name, i, len_models)
+            
+            json_path = f"./models/{model_name}.json"
+            try:
+                with open(json_path, "r") as f:
+                    model_conf = json.load(f)
+                    for dependency in model_conf.get("dependence", []):
+                        dep_key = dependency.lower()
+                        status = self._dep_status.get(dep_key)
+                        if status is True:
+                            continue
+                        if status is False:
+                            self.progress_updated.emit(f"跳过依赖: {dependency}", i, len_models)
+                            continue
+
+                        def _is_importable(name):
+                            candidates = [name, name.replace('-', '_')]
+                            if name.lower() == 'pyside6':
+                                candidates.insert(0, 'PySide6')
+                            seen = set()
+                            out = []
+                            for c in candidates:
+                                if c not in seen:
+                                    seen.add(c)
+                                    out.append(c)
+                            for cand in out:
+                                try:
+                                    importlib.import_module(cand)
+                                    return True
+                                except Exception:
+                                    continue
+                            return False
+
+                        if not _is_importable(dependency):
+                            self.progress_updated.emit(f"缺失依赖: {dependency}", i, len_models)
+                            
+                            # 暂时使用控制台进行用户输入
+                            print(f"\n依赖 {dependency} 对于模型 {model_name} 缺失。")
+                            if input(f"是否安装 {dependency}? (y/n): ").lower() == 'y':
+                                try:
+                                    subprocess.check_call(["pip", "install", dependency])
+                                except subprocess.CalledProcessError as e:
+                                    print(f"安装 {dependency} 失败: {e}")
+                                    self._dep_status[dep_key] = False
+                                    break
+                                else:
+                                    if _is_importable(dependency):
+                                        self._dep_status[dep_key] = True
+                                    else:
+                                        print(f"已安装 {dependency} 但仍无法导入。")
+                                        self._dep_status[dep_key] = False
+                                        break
+                            else:
+                                self._dep_status[dep_key] = False
+                                break
+                        else:
+                            self._dep_status[dep_key] = True
+            
+                # 加载模型
+                mod = importlib.import_module(f"models.{model_name}")
+                cls = getattr(mod, model_name)
+                inst = cls()
+                inst.start()
+                self._running_models[model_name] = inst
+                
+                # 发出加载成功信号
+                self.progress_updated.emit(f"已加载: {model_name}", i, len_models)
+                
+            except Exception as e:
+                self.progress_updated.emit(f"加载失败: {model_name}", i, len_models)
+                continue
+        
+        # 发出完成信号
+        self.progress_updated.emit("完成", len_models, len_models)
+        self.loading_finished.emit()
 
 class LoadingWindow(QWidget):
     def __init__(self, total_models):
@@ -213,6 +308,14 @@ class LoadingWindow(QWidget):
         
         # 处理事件以确保UI更新
         QApplication.processEvents()
+
+    def on_loading_finished(self):
+        """加载完成后的处理"""
+        self.current_model_label.setText("所有模型加载完成!")
+        QApplication.processEvents()
+        
+        # 延迟后使用动画隐藏窗口
+        QTimer.singleShot(800, self.hide_with_animation)
     
     def paintEvent(self, event):
         # 绘制半透明黑色背景和边框
@@ -241,6 +344,7 @@ class cmd:
         # 创建GUI应用（但不立即显示）
         self.app = QApplication.instance() or QApplication(sys.argv)
         self.loading_window = None
+        self.loader_thread = None
         
         self.loadModels()
     
@@ -254,98 +358,13 @@ class cmd:
         # 确保窗口显示
         QApplication.processEvents()
         
+        # 创建并启动模型加载线程
+        self.loader_thread = ModelLoaderThread(self.conf)
+        self.loader_thread.progress_updated.connect(self.loading_window.update_progress)
+        self.loader_thread.loading_finished.connect(self.loading_window.on_loading_finished)
+        
         # 添加短暂延迟，确保动画开始
-        QTimer.singleShot(50, lambda: self._load_models_after_delay(len_models))
-    
-    def _load_models_after_delay(self, len_models):
-        """延迟加载模型，确保动画已经开始"""
-        for i in range(len_models):
-            model_name = self.conf['models']['enabled'][i]
-            
-            # 更新GUI进度
-            self.loading_window.update_progress(model_name, i, len_models)
-            
-            json_path = f"./models/{model_name}.json"
-            with open(json_path, "r") as f:
-                model_conf = json.load(f)
-                for dependency in model_conf.get("dependence", []):
-                    dep_key = dependency.lower()
-                    status = self._dep_status.get(dep_key)
-                    if status is True:
-                        continue
-                    if status is False:
-                        self.loading_window.current_model_label.setText(f"跳过依赖: {dependency}")
-                        QApplication.processEvents()
-                        continue
-
-                    def _is_importable(name):
-                        candidates = [name, name.replace('-', '_')]
-                        if name.lower() == 'pyside6':
-                            candidates.insert(0, 'PySide6')
-                        seen = set()
-                        out = []
-                        for c in candidates:
-                            if c not in seen:
-                                seen.add(c)
-                                out.append(c)
-                        for cand in out:
-                            try:
-                                importlib.import_module(cand)
-                                return True
-                            except Exception:
-                                continue
-                        return False
-
-                    if not _is_importable(dependency):
-                        self.loading_window.current_model_label.setText(f"缺失依赖: {dependency}")
-                        QApplication.processEvents()
-                        
-                        # 暂时使用控制台进行用户输入
-                        print(f"\n依赖 {dependency} 对于模型 {model_name} 缺失。")
-                        if input(f"是否安装 {dependency}? (y/n): ").lower() == 'y':
-                            try:
-                                subprocess.check_call(["pip", "install", dependency])
-                            except subprocess.CalledProcessError as e:
-                                print(f"安装 {dependency} 失败: {e}")
-                                self._dep_status[dep_key] = False
-                                break
-                            else:
-                                if _is_importable(dependency):
-                                    self._dep_status[dep_key] = True
-                                else:
-                                    print(f"已安装 {dependency} 但仍无法导入。")
-                                    self._dep_status[dep_key] = False
-                                    break
-                        else:
-                            self._dep_status[dep_key] = False
-                            break
-                    else:
-                        self._dep_status[dep_key] = True
-            
-            # 加载模型
-            try:
-                mod = importlib.import_module(f"models.{model_name}")
-                cls = getattr(mod, model_name)
-                inst = cls()
-                inst.start()
-                self._running_models[model_name] = inst
-                
-                # 更新GUI显示加载成功
-                self.loading_window.current_model_label.setText(f"已加载: {model_name}")
-                QApplication.processEvents()
-                
-            except Exception as e:
-                self.loading_window.current_model_label.setText(f"加载失败: {model_name}")
-                QApplication.processEvents()
-                continue
-        
-        # 完成加载，使用动画关闭窗口
-        self.loading_window.update_progress("完成", len_models, len_models)
-        self.loading_window.current_model_label.setText("所有模型加载完成!")
-        QApplication.processEvents()
-        
-        # 延迟后使用动画隐藏窗口
-        QTimer.singleShot(800, self.loading_window.hide_with_animation)
+        QTimer.singleShot(50, self.loader_thread.start)
     
     def cmd(self):
         # 原有cmd方法保持不变
