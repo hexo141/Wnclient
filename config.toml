@@ -1,2 +1,5 @@
+Update_Link = "https://raw.githubusercontent.com/hexo141/Wnclient/refs/heads/main/version.txt"
+Now_Version = 0.05
 [models]
 enabled = [ "fps", "cps", "keyb",]
+
