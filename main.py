@@ -5,15 +5,15 @@ from rich.text import Text
 import json
 import subprocess
 import importlib
-import importlib.util
 import sys
-import os
-
+import Update
+import threading
 # PySide6 GUI 组件
 from PySide6.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, 
                                QProgressBar, QLabel, QFrame)
 from PySide6.QtCore import Qt, QTimer, QPropertyAnimation, QEasingCurve, QPoint, QThread, Signal
 from PySide6.QtGui import QFont, QFontDatabase, QPixmap, QPainter, QPainterPath, QColor
+client_config = toml.load("config.toml")
 
 class RoundedPixmapLabel(QLabel):
     """自定义圆角图片标签"""
@@ -429,5 +429,9 @@ class cmd:
                         toml.dump(self.conf, f)
 
 if __name__ == "__main__":
+    # 启动更新检查线程
+    Update_task = threading.Thread(target=Update.main, kwargs={"auto": client_config.get("AutoCheckUpdate", True)})
+    Update_task.start()
+
     command = cmd()
     command.cmd()
