@@ -1,18 +1,17 @@
-import toml
 import requests
 import json
 import os
 import zipfile
-client_config = toml.load("config.toml")
+client_ver = json.load(open("version.json", "r", encoding="utf-8"))
 def check_for_updates():
     try:
-        rep = requests.get(client_config["Update_Link"])
+        rep = requests.get("https://raw.githubusercontent.com/hexo141/Wnclient/refs/heads/main/version.json")
     except requests.exceptions as e:
         print(f"Error checking for updates: {e}")
         return False
     remote_version_info = rep.json()
     ver_json = remote_version_info.get("NowVersion", 0)
-    if ver_json > client_config["Now_Version"]:
+    if ver_json > client_ver["NowVersion"]:
         return True
 def download_update():
     update_url = "https://github.com/hexo141/Wnclient/archive/refs/heads/main.zip"

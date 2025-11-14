@@ -1,5 +1,3 @@
-Update_Link = "https://raw.githubusercontent.com/hexo141/Wnclient/refs/heads/main/version.json"
-Now_Version = 0.001
 AutoCheckUpdate = false
 [models]
 enabled = [ "fps", "cps", "keyb",]
