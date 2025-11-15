@@ -38,12 +38,12 @@ def main(auto=True):
         print("\033[033mA new update is available!\033[0m")
         if auto:
             download_update()
-            print("\033[032mUpdate downloaded successfully. Please replace the old files with the new ones from the 'updates' folder.\033[0m")
+            print("\033[032mUpdate downloaded successfully. Please replace the old files with the new ones from the '../updates' folder.\033[0m")
             return True
         if __name__ == "__main__":
             if input("Do you want to download the update? (y/n): ").lower() == 'y':
                 download_update()
-                print("\033[032mUpdate downloaded successfully. Please replace the old files with the new ones from the 'updates' folder.\033[0m")
+                print("\033[032mUpdate downloaded successfully. Please replace the old files with the new ones from the '../updates' folder.\033[0m")
                 return True
     else:
         print("\033[032mYou are using the latest version.\033[0m")
