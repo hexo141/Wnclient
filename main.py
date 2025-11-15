@@ -15,40 +15,22 @@ from PySide6.QtCore import Qt, QTimer, QPropertyAnimation, QEasingCurve, QPoint,
 from PySide6.QtGui import QFont, QFontDatabase, QPixmap, QPainter, QPainterPath, QColor
 client_config = toml.load("config.toml")
 
-class RoundedPixmapLabel(QLabel):
-    """自定义圆角图片标签"""
+class SquarePixmapLabel(QLabel):
+    """自定义方形图片标签"""
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setFixedSize(60, 60)
+        self.setFixedSize(40, 40)  # 更紧凑的尺寸
         
     def setPixmap(self, pixmap):
-        # 创建圆角图片
-        rounded_pixmap = self.create_rounded_pixmap(pixmap, 10)  # 10px圆角
-        super().setPixmap(rounded_pixmap)
+        # 创建方形图片
+        square_pixmap = self.create_square_pixmap(pixmap)
+        super().setPixmap(square_pixmap)
         
-    def create_rounded_pixmap(self, pixmap, radius):
-        """创建圆角图片"""
+    def create_square_pixmap(self, pixmap):
+        """创建方形图片"""
         # 调整图片大小
         pixmap = pixmap.scaled(self.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
-        
-        # 创建透明背景的图片
-        rounded = QPixmap(self.size())
-        rounded.fill(Qt.transparent)
-        
-        # 绘制圆角图片
-        painter = QPainter(rounded)
-        painter.setRenderHint(QPainter.Antialiasing)
-        
-        # 创建圆角路径
-        path = QPainterPath()
-        path.addRoundedRect(0, 0, self.width(), self.height(), radius, radius)
-        painter.setClipPath(path)
-        
-        # 绘制图片
-        painter.drawPixmap(0, 0, pixmap)
-        painter.end()
-        
-        return rounded
+        return pixmap
 
 class ModelLoaderThread(QThread):
     """模型加载线程"""
@@ -157,64 +139,62 @@ class LoadingWindow(QWidget):
         # 设置窗口属性
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
         self.setAttribute(Qt.WA_TranslucentBackground)
-        self.setFixedSize(500, 120)
+        self.setFixedSize(400, 80)  # 更紧凑的尺寸
         
         # 加载自定义字体
-        font_id = QFontDatabase.addApplicationFont("./assets/YEFONTColorFonts0831-Color1-2.ttf")
+        font_id = QFontDatabase.addApplicationFont("./assets/AiDianFengYaHei（ShangYongMianFei）-2.ttf")
         if font_id != -1:
             font_family = QFontDatabase.applicationFontFamilies(font_id)[0]
-            self.custom_font = QFont(font_family, 12)
+            self.custom_font = QFont(font_family, 10)  # 更小的字体
         else:
-            self.custom_font = QFont("Microsoft YaHei", 12)
+            self.custom_font = QFont("Microsoft YaHei", 10)
         
         # 主布局 - 水平排列
         main_layout = QHBoxLayout()
-        main_layout.setContentsMargins(20, 20, 20, 20)
-        main_layout.setSpacing(20)
+        main_layout.setContentsMargins(15, 15, 15, 15)  # 更紧凑的边距
+        main_layout.setSpacing(15)
         
-        # 左侧图标 - 使用圆角图片标签
-        self.icon_label = RoundedPixmapLabel()
+        # 左侧图标 - 使用方形图片标签
+        self.icon_label = SquarePixmapLabel()
         pixmap = QPixmap("./icon.png")
         if not pixmap.isNull():
             self.icon_label.setPixmap(pixmap)
         self.icon_label.setAlignment(Qt.AlignCenter)
-        
+
         # 右侧内容区域
         content_layout = QVBoxLayout()
-        content_layout.setSpacing(8)
+        content_layout.setSpacing(5)  # 更紧凑的间距
         
         # 标题 - Wnclient
         title_label = QLabel("Wnclient")
         title_label.setFont(self.custom_font)
-        title_label.setStyleSheet("color: #ffffff; font-size: 20px; font-weight: bold;")
+        title_label.setStyleSheet("color: #ffffff; font-size: 16px; font-weight: bold;")  # 更小的字体
         
         # 进度条布局
         progress_layout = QHBoxLayout()
-        progress_layout.setSpacing(10)
+        progress_layout.setSpacing(8)
         
-        # 白色进度条
+        # 黑白风格进度条
         self.progress_bar = QProgressBar()
-        self.progress_bar.setFixedHeight(20)
+        self.progress_bar.setFixedHeight(12)  # 更细的进度条
         self.progress_bar.setMaximum(self.total_models)
         self.progress_bar.setTextVisible(False)
         self.progress_bar.setStyleSheet("""
             QProgressBar {
-                background-color: rgba(80, 80, 80, 200);
-                border: 1px solid #666666;
-                border-radius: 10px;
+                background-color: #000000;
+                border: 1px solid #ffffff;
             }
             QProgressBar::chunk {
                 background-color: #ffffff;
-                border-radius: 9px;
-                margin: 1px;
+                margin: 0px;
             }
         """)
         
         # 进度文本
         self.progress_text = QLabel("0%")
         self.progress_text.setFont(self.custom_font)
-        self.progress_text.setStyleSheet("color: #ffffff; font-size: 14px; font-weight: bold;")  # 改为白色
-        self.progress_text.setFixedWidth(40)
+        self.progress_text.setStyleSheet("color: #ffffff; font-size: 12px; font-weight: bold;")
+        self.progress_text.setFixedWidth(30)  # 更窄的宽度
         self.progress_text.setAlignment(Qt.AlignCenter)
         
         progress_layout.addWidget(self.progress_bar)
@@ -223,7 +203,7 @@ class LoadingWindow(QWidget):
         # 当前模型标签
         self.current_model_label = QLabel("准备加载模型...")
         self.current_model_label.setFont(self.custom_font)
-        self.current_model_label.setStyleSheet("color: #ffffff; font-size: 12px;")  # 改为白色
+        self.current_model_label.setStyleSheet("color: #ffffff; font-size: 10px;")  # 更小的字体
         
         # 添加到内容布局
         content_layout.addWidget(title_label)
@@ -244,8 +224,8 @@ class LoadingWindow(QWidget):
         
         # 创建窗口位置动画
         self.position_animation = QPropertyAnimation(self, b"pos")
-        self.position_animation.setEasingCurve(QEasingCurve.OutCubic)  # 使用OutCubic实现先快后慢
-        self.position_animation.setDuration(400)  # 稍微缩短动画时间
+        self.position_animation.setEasingCurve(QEasingCurve.OutCubic)
+        self.position_animation.setDuration(400)
     
     def showEvent(self, event):
         """重写显示事件，添加入场动画"""
@@ -318,21 +298,21 @@ class LoadingWindow(QWidget):
         QTimer.singleShot(800, self.hide_with_animation)
     
     def paintEvent(self, event):
-        # 绘制半透明黑色背景和边框
+        # 绘制黑白风格背景和白色边框
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
         
-        # 创建圆角矩形路径
+        # 创建矩形路径（去掉圆角）
         path = QPainterPath()
-        path.addRoundedRect(0, 0, self.width(), self.height(), 10, 10)
+        path.addRect(0, 0, self.width(), self.height())
         
-        # 填充半透明黑色背景
+        # 填充黑色背景
         painter.setClipPath(path)
-        painter.fillRect(self.rect(), QColor(30, 30, 30, 230))
+        painter.fillRect(self.rect(), QColor(0, 0, 0, 178)) 
         
-        # 绘制边框
-        painter.setPen(QColor(80, 80, 80, 255))
-        painter.drawPath(path)
+        # 绘制白色边框
+        painter.setPen(QColor(255, 255, 255, 255))  # 白色边框
+        painter.drawRect(0, 0, self.width()-1, self.height()-1)
 
 class cmd:
     def __init__(self):
@@ -430,8 +410,9 @@ class cmd:
 
 if __name__ == "__main__":
     # 启动更新检查线程
-    Update_task = threading.Thread(target=Update.main, kwargs={"auto": client_config.get("AutoCheckUpdate", True)})
-    Update_task.start()
+    if client_config.get("AutoCheckUpdate", True):
+        Update_task = threading.Thread(target=Update.main)
+        Update_task.start()
 
     command = cmd()
     command.cmd()

@@ -32,14 +32,13 @@ def download_update():
         print(f"Error extracting update: {e}")
         return False
 
-def main(auto=True):
+def main():
     print("\n")
     if check_for_updates():
         print("\033[033mA new update is available!\033[0m")
-        if auto:
-            download_update()
-            print("\033[032mUpdate downloaded successfully. Please replace the old files with the new ones from the '../updates' folder.\033[0m")
-            return True
+        download_update()
+        print("\033[032mUpdate downloaded successfully. Please replace the old files with the new ones from the '../updates' folder.\033[0m")
+        return True
         if __name__ == "__main__":
             if input("Do you want to download the update? (y/n): ").lower() == 'y':
                 download_update()
