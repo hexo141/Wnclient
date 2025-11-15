@@ -1,11 +1,11 @@
 import pygame
 import threading
-import time
 
 class rains:
     def __init__(self):
         self.is_playing = False
         self.thread = None
+        self.sound = None
         
     def start(self):
         """开始播放雨声"""
@@ -16,28 +16,32 @@ class rains:
         self.thread = threading.Thread(target=self._play_rain_sound)
         self.thread.daemon = True
         self.thread.start()
+        print("雨声模块启动")
         
     def stop(self):
         """停止播放雨声"""
         self.is_playing = False
-        if hasattr(self, 'sound'):
+        if self.sound:
             self.sound.stop()
+        print("雨声模块停止")
     
     def _play_rain_sound(self):
-        """在后台线程中播放雨声"""
+        """在后台线程中连续播放雨声"""
         try:
             pygame.mixer.init()
-            self.sound = pygame.mixer.Sound('assets/mc_rain.ogg')
+            self.sound = pygame.mixer.Sound('assets/rains.wav')
             self.sound.set_volume(0.25)
             
+            # 使用循环播放，-1表示无限循环
+            self.sound.play(loops=-1)
+            
+            # 保持线程运行，直到停止信号
             while self.is_playing:
-                self.sound.play()
-                # 等待音效播放完毕或停止信号
-                while self.is_playing and pygame.mixer.get_busy():
-                    time.sleep(0.1)
-                    
+                pygame.time.wait(100)  # 每100毫秒检查一次
+                
         except Exception as e:
             print(f"播放雨声时出错: {e}")
         finally:
-            if hasattr(self, 'sound'):
+            if self.sound:
                 self.sound.stop()
+            pygame.mixer.quit()
