@@ -3,3 +3,4 @@ toml
 rich
 pyside6
 requests
+uv

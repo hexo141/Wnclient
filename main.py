@@ -1,22 +1,38 @@
-import tqdm
-import toml
-from rich.console import Console
-from rich.text import Text
-import json
 import subprocess
-import importlib
 import sys
-import Update
-import threading
-import platform
-import os
-# PySide6 GUI 组件
-from PySide6.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, 
-                               QProgressBar, QLabel, QFrame)
-from PySide6.QtCore import Qt, QTimer, QPropertyAnimation, QEasingCurve, QPoint, QThread, Signal
-from PySide6.QtGui import QFont, QFontDatabase, QPixmap, QPainter, QPainterPath, QColor
+try:
+    import toml
+    from rich.console import Console
+    from rich.text import Text
+    import json
+    import importlib
+    import sys
+    import Update
+    import threading
+    import platform
+    import os
+    # PySide6 GUI 组件
+    from PySide6.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, 
+                                QProgressBar, QLabel, QFrame)
+    from PySide6.QtCore import Qt, QTimer, QPropertyAnimation, QEasingCurve, QPoint, QThread, Signal
+    from PySide6.QtGui import QFont, QFontDatabase, QPixmap, QPainter, QPainterPath, QColor
+except ImportError as e:
+    print(f"Missing module: {e.name}. Attempting to install...")
+    try:
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "uv"])
+    except subprocess.CalledProcessError as e:
+        print(f"Failed to install uv module: {e}")
+        sys.exit(1)
+    try:
+        subprocess.check_call(["uv","pip","install","--requirement","requirements.txt","--python",sys.executable])
+    except subprocess.CalledProcessError as e:
+        print(f"Failed to install dependencies: {e}")
+        sys.exit(1)
+    else:
+        print("依赖安装完成，请重启应用程序。")
+        print("Dependencies installed. Please restart the application.")
+        sys.exit(0)
 client_config = toml.load("config.toml")
-
 class SquarePixmapLabel(QLabel):
     """自定义方形图片标签"""
     def __init__(self, parent=None):
