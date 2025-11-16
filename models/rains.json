@@ -1,3 +1,4 @@
 {
-    "dependence": ["pygame"]
+    "dependence": ["pygame"],
+    "platforms": ["windows", "linux", "Darwin"]
 }

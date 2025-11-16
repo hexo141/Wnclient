@@ -1,3 +1,4 @@
 {
-  "dependence": []
+  "dependence": [],
+  "platforms": ["windows", "linux", "Darwin"]
 }

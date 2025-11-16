@@ -8,6 +8,8 @@ import importlib
 import sys
 import Update
 import threading
+import platform
+import os
 # PySide6 GUI 组件
 from PySide6.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, 
                                QProgressBar, QLabel, QFrame)
@@ -57,6 +59,10 @@ class ModelLoaderThread(QThread):
             try:
                 with open(json_path, "r") as f:
                     model_conf = json.load(f)
+                # 检查平台兼容性
+                support_platfrom = model_conf.get("platforms", []) # 类型有windows, linux, darwin
+                if platform.system().lower() not in support_platfrom:
+                    self.progress_updated.emit(f"跳过模型: {model_name} (不支持的平台)", i, len_models)
                     for dependency in model_conf.get("dependence", []):
                         dep_key = dependency.lower()
                         status = self._dep_status.get(dep_key)
@@ -379,28 +385,38 @@ class cmd:
             else:
                 try:
                     mod = importlib.import_module(f"models.{user_input}")
-                except ImportError:
-                    print(f"Model {user_input} not found.")
-                except SyntaxError:
-                    print("Invalid command syntax.")
+                except ImportError as e:
+                    print(f"Model {user_input} not found: {e}")
+                except SyntaxError as e:
+                    print("Invalid command syntax: {e}")
                 except Exception as e:
                     print(f"An error occurred: {e}")
                 else:
+                    model_conf = json.load(open(f"./models/{user_input}.json", "r"))
+                    support_platfrom = model_conf.get("platforms", []) # 类型有windows, linux, darwin
+                    if platform.system().lower() not in support_platfrom:
+                        print(f"Platform not supported for model: {user_input}")
+                        continue
                     print(f"Model {user_input} executed successfully.")
                     if user_input not in self._running_models:
                         try:
                             cls = getattr(mod, user_input)
                             inst = cls()
-                            inst.start()
+                            result = inst.start()
+                            
+                            # 检查返回值，如果是单次任务则不添加到 enabled 列表
+                            if result != {"Wnclient": "Single mission"}:
+                                if user_input not in self.conf['models']['enabled']:
+                                    self.conf['models']['enabled'].append(user_input)
+                            
                             self._running_models[user_input] = inst
-                            if user_input not in self.conf['models']['enabled']:
-                                self.conf['models']['enabled'].append(user_input)
                         except Exception as e:
                             print(f"Failed to start model {user_input}: {e}")
                     else:
                         try:
                             inst = self._running_models.pop(user_input)
                             inst.stop()
+                            # 停止时也需要检查返回值决定是否从 enabled 列表中移除
                             if user_input in self.conf['models']['enabled']:
                                 self.conf['models']['enabled'].remove(user_input)
                         except Exception as e:

@@ -1,0 +1,4 @@
+{
+    "dependence": ["pyside6","screeninfo","keyboard"],
+    "platforms": ["windows"]
+}

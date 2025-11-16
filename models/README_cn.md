@@ -14,7 +14,9 @@ class example:
 ## JSON配置文件要求如下
 ```json
 {
-    "dependence": ["pyside6","example"]
+    "dependence": ["pyside6","example"],
+    "platforms": ["windows"]
 }
 ```
 其中dependence是所需要的模块名，主程序启动时会让用户安装他
+其中platforms是所支持的平台，类型有windows, linux, darwin，全部小写

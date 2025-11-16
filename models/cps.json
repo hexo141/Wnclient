@@ -1,3 +1,4 @@
 {
-  "dependence": ["pyside6","pynput"]
+  "dependence": ["pyside6","pynput"],
+  "platforms": ["windows", "linux", "Darwin"]
 }
