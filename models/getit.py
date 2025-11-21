@@ -7,12 +7,12 @@ class getit:
         self.compile_path = str(pathlib.Path(os.getcwd()) / "getit" / "getit.exe")
         if not os.path.exists(self.compile_path):
             try:
-                subprocess.run(f"g++ {self.c_path} -o {self.compile_path}")
+                subprocess.run(f"g++ {self.c_path} -o {self.compile_path} -municode")
             except FileNotFoundError as e:
                 print(f"FileNotFound: {e}")
     def start(self):
         try:
-            subprocess.run(self.compile_path)
+            subprocess.run(f"{self.compile_path} {input("Please enter the full path: ")}")
         except FileNotFoundError as e :
             print(f"Error: {e}")
         return {"Wnclient": "Single mission"}

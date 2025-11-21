@@ -196,13 +196,77 @@ void Get_system_process(const wchar_t* exePath) {
 }
 
 int main() {
-    if (!IsCurrentProcessSystem()) {
-        Get_system_process(getexepath());
-        return 0;
+    // 获取命令行参数
+    int argc;
+    wchar_t** argv = CommandLineToArgvW(GetCommandLineW(), &argc);
+    
+    // 检查命令行参数
+    if (argc < 2) {
+        wprintf(L"Usage: %s <executable_path>\n", argv[0]);
+        wprintf(L"Example: %s cmd.exe\n", argv[0]);
+        LocalFree(argv);
+        
+        // 如果没有参数，显示提示并等待用户按键
+        wprintf(L"Press any key to exit...\n");
+        getchar();
+        return 1;
     }
     
-    // 硬编码路径
-    wchar_t exePath[] = L"cmd.exe";
+    wchar_t* exePath = argv[1];
+    
+    if (!IsCurrentProcessSystem()) {
+        // 重新以SYSTEM权限运行当前程序，并传递相同的参数
+        wchar_t currentExe[MAX_PATH];
+        GetModuleFileNameW(NULL, currentExe, MAX_PATH);
+        
+        // 构建命令行：当前程序路径 + 原始参数
+        wchar_t cmdLine[1024];
+        swprintf(cmdLine, 1024, L"\"%s\" \"%s\"", currentExe, exePath);
+        
+        DWORD Pid1 = Get_SYSTEM_Pid();
+        if (Pid1 == 0) {
+            LocalFree(argv);
+            return 1;
+        }
+        
+        HANDLE hProc1 = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, Pid1);
+        if (!hProc1) {
+            LocalFree(argv);
+            return 1;
+        }
+        
+        HANDLE hToken1 = NULL;
+        if (!OpenProcessToken(hProc1, TOKEN_QUERY | TOKEN_DUPLICATE, &hToken1)) {
+            CloseHandle(hProc1);
+            LocalFree(argv);
+            return 1;
+        }
+        
+        HANDLE hSysToken1 = NULL;
+        if (!DuplicateTokenEx(hToken1, TOKEN_ALL_ACCESS, NULL, SecurityImpersonation, 
+                             TokenPrimary, &hSysToken1)) {
+            CloseHandle(hToken1);
+            CloseHandle(hProc1);
+            LocalFree(argv);
+            return 1;
+        }
+        
+        STARTUPINFOW si = { sizeof(si) };
+        PROCESS_INFORMATION pi = {0};
+        
+        if (!CreateProcessWithTokenW(hSysToken1, 0, currentExe, cmdLine, 0, NULL, NULL, &si, &pi)) {
+            wprintf(L"Failed to restart with SYSTEM privileges\n");
+        } else {
+            CloseHandle(pi.hProcess);
+            CloseHandle(pi.hThread);
+        }
+        
+        CloseHandle(hSysToken1);
+        CloseHandle(hToken1);
+        CloseHandle(hProc1);
+        LocalFree(argv);
+        return 0;
+    }
     
     wprintf(L"Starting program with TrustedInstaller privileges: %s\n", exePath);
     
@@ -212,12 +276,14 @@ int main() {
     DWORD Pid = Get_TI_Pid();
     if (Pid == 0) {
         wprintf(L"TrustedInstaller process not found\n");
+        LocalFree(argv);
         return 1;
     }
     
     HANDLE hProc = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, Pid);
     if (!hProc) {
         wprintf(L"Failed to open process: %d\n", GetLastError());
+        LocalFree(argv);
         return 1;
     }
     
@@ -225,6 +291,7 @@ int main() {
     if (!OpenProcessToken(hProc, TOKEN_QUERY | TOKEN_DUPLICATE, &hToken)) {
         wprintf(L"Failed to open process token: %d\n", GetLastError());
         CloseHandle(hProc);
+        LocalFree(argv);
         return 1;
     }
     
@@ -234,6 +301,7 @@ int main() {
         wprintf(L"Failed to duplicate token: %d\n", GetLastError());
         CloseHandle(hToken);
         CloseHandle(hProc);
+        LocalFree(argv);
         return 1;
     }
     
@@ -252,6 +320,7 @@ int main() {
     CloseHandle(hSysToken);
     CloseHandle(hToken);
     CloseHandle(hProc);
+    LocalFree(argv);
     
     return 0;
 }

@@ -404,7 +404,7 @@ class cmd:
                 except ImportError as e:
                     print(f"Model {user_input} not found: {e}")
                 except SyntaxError as e:
-                    print("Invalid command syntax: {e}")
+                    print(f"Invalid command syntax: {e}")
                 except Exception as e:
                     print(f"An error occurred: {e}")
                 else:
