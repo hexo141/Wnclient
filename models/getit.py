@@ -12,9 +12,7 @@ class getit:
                 print(f"FileNotFound: {e}")
     def start(self):
         try:
-            subprocess.run(f"{self.compile_path} {input("Please enter the full path: ")}")
+            subprocess.run(f"{self.compile_path} {input('Please enter the full path: ')}")
         except FileNotFoundError as e :
             print(f"Error: {e}")
-        return {"Wnclient": "Single mission"}
-    def stop(self):
         return {"Wnclient": "Single mission"}

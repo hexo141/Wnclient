@@ -1,0 +1,11 @@
+{
+    "dependence": ["pyside6", "python-xlib"],
+    "platforms": ["windows", "linux"],
+    "config": {
+        "border_thickness": 3.5,
+        "corner_radius": 12,
+        "follow_speed": 0.18,
+        "hue_step": 3,
+        "tick_interval_ms": 30
+    }
+}

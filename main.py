@@ -135,9 +135,23 @@ class ModelLoaderThread(QThread):
                 mod = importlib.import_module(f"models.{model_name}")
                 cls = getattr(mod, model_name)
                 inst = cls()
-                inst.start()
-                self._running_models[model_name] = inst
-                
+                try:
+                    result = inst.start()
+                except Exception as e:
+                    self.progress_updated.emit(f"模型运行错误: {model_name}", i, len_models)
+                    continue
+
+                # 如果不是单次任务，则保存实例以便后续 stop
+                if result != {"Wnclient": "Single mission"}:
+                    self._running_models[model_name] = inst
+                else:
+                    # 单次任务不保留为已运行状态，防止被 stop 或重复启动
+                    try:
+                        if model_name in self.conf.get('models', {}).get('enabled', []):
+                            self.conf['models']['enabled'].remove(model_name)
+                    except Exception:
+                        pass
+
                 # 发出加载成功信号
                 self.progress_updated.emit(f"已加载: {model_name}", i, len_models)
                 
@@ -419,13 +433,15 @@ class cmd:
                             cls = getattr(mod, user_input)
                             inst = cls()
                             result = inst.start()
-                            
-                            # 检查返回值，如果是单次任务则不添加到 enabled 列表
+
+                            # 检查返回值：单次任务不加入 enabled 列表，也不保存实例
                             if result != {"Wnclient": "Single mission"}:
                                 if user_input not in self.conf['models']['enabled']:
                                     self.conf['models']['enabled'].append(user_input)
-                            
-                            self._running_models[user_input] = inst
+                                self._running_models[user_input] = inst
+                            else:
+                                # 单次任务：不保存实例，直接继续
+                                pass
                         except Exception as e:
                             print(f"Failed to start model {user_input}: {e}")
                     else:
