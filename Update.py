@@ -109,6 +109,14 @@ def download_update_and_replace():
             print(f" - {p}")
     else:
         print("No files needed replacement; already up-to-date.")
+    # 清理解压的更新文件（删除 updates 目录和 zip）
+    try:
+        if updates_dir.exists():
+            shutil.rmtree(updates_dir)
+            print(f"Cleaned up temporary updates directory: {updates_dir}")
+    except Exception as e:
+        print(f"Warning: failed to remove updates directory: {e}")
+
     return True
 
 
