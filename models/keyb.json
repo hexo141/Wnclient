@@ -1,4 +1,6 @@
 {
-  "dependence": [],
-  "platforms": ["windows", "linux", "Darwin"]
+  "Wnclient": {
+    "dependence": [],
+    "platforms": ["windows", "linux", "Darwin"]
+  }
 }

@@ -80,11 +80,12 @@ class ModelLoaderThread(QThread):
             try:
                 with open(json_path, "r") as f:
                     model_conf = json.load(f)
-                # 检查平台兼容性
-                support_platfrom = model_conf.get("platforms", []) # 类型有windows, linux, darwin
+                # 检查平台兼容性（现在依赖和平台信息在 Wnclient 字典内）
+                wn_cfg = model_conf.get("Wnclient", {})
+                support_platfrom = wn_cfg.get("platforms", []) # 类型有windows, linux, darwin
                 if platform.system().lower() not in support_platfrom:
                     self.progress_updated.emit(f"跳过模型: {model_name} (不支持的平台)", i, len_models)
-                    for dependency in model_conf.get("dependence", []):
+                    for dependency in wn_cfg.get("dependence", []):
                         dep_key = dependency.lower()
                         status = self._dep_status.get(dep_key)
                         if status is True:
@@ -113,7 +114,7 @@ class ModelLoaderThread(QThread):
 
                         if not _is_importable(dependency):
                             self.progress_updated.emit(f"缺失依赖: {dependency}", i, len_models)
-                            
+
                             # 暂时使用控制台进行用户输入
                             print(f"\n依赖 {dependency} 对于模型 {model_name} 缺失。")
                             if input(f"是否安装 {dependency}? (y/n): ").lower() == 'y':
@@ -432,7 +433,8 @@ class cmd:
                     print(f"An error occurred: {e}")
                 else:
                     model_conf = json.load(open(f"./models/{user_input}.json", "r"))
-                    support_platfrom = model_conf.get("platforms", []) # 类型有windows, linux, darwin
+                    wn_cfg = model_conf.get("Wnclient", {})
+                    support_platfrom = wn_cfg.get("platforms", []) # 类型有windows, linux, darwin
                     if platform.system().lower() not in support_platfrom:
                         print(f"Platform not supported for model: {user_input}")
                         continue

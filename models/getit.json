@@ -1,4 +1,6 @@
 {
-    "dependence": ["pyside6","screeninfo","keyboard"],
-    "platforms": ["windows"]
+    "Wnclient": {
+        "dependence": ["pyside6","screeninfo"],
+        "platforms": ["windows"]
+    }
 }

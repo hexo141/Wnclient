@@ -19,8 +19,10 @@ return {"Wnclient": "Single mission"}
 就不需要写stop方法，因为他是单次模块
 ```json
 {
-    "dependence": ["pyside6","example"],
-    "platforms": ["windows"]
+    "Wnclient":{
+        "dependence": ["pyside6","example"],
+        "platforms": ["windows"]
+    }
 }
 ```
 其中dependence是所需要的模块名，主程序启动时会让用户安装他

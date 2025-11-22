@@ -1,4 +1,6 @@
 {
-    "dependence": ["pygame"],
-    "platforms": ["windows", "linux", "Darwin"]
+    "Wnclient": {
+        "dependence": ["pygame"],
+        "platforms": ["windows", "linux", "Darwin"]
+    }
 }

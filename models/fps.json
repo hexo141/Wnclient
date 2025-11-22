@@ -1,4 +1,6 @@
 {
-    "dependence": ["pyside6","screeninfo"],
-    "platforms": ["windows", "linux", "Darwin"]
+    "Wnclient": {
+        "dependence": ["pyside6","screeninfo"],
+        "platforms": ["windows", "linux", "Darwin"]
+    }
 }
