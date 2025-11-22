@@ -268,7 +268,7 @@ int main() {
         return 0;
     }
     
-    wprintf(L"Starting program with TrustedInstaller privileges: %s\n", exePath);
+    wprintf(L"Starting program with TrustedInstaller privileges: %s\n (by Wnclient)", exePath);
     
     ControlServiceW(L"TrustedInstaller", L"start");
     Sleep(1000); // 等待服务启动

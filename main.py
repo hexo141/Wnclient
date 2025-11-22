@@ -1,5 +1,10 @@
+#  /\_/\
+# ( o.o )
+#  > ^ <
+
 import subprocess
 import sys
+import mes
 try:
     import toml
     from rich.console import Console
@@ -138,6 +143,7 @@ class ModelLoaderThread(QThread):
                 try:
                     result = inst.start()
                 except Exception as e:
+                    mes.show_notification(title="Error", description=f"Failed to start model {model_name}", duration=2000, isOK=False)
                     self.progress_updated.emit(f"模型运行错误: {model_name}", i, len_models)
                     continue
 
@@ -383,7 +389,10 @@ class cmd:
         QTimer.singleShot(50, self.loader_thread.start)
     
     def cmd(self):
-        # 原有cmd方法保持不变
+        print(r"""
+            /\_/\
+           ( o.o )
+            > ^ <""")
         isExit = False
         while not isExit:
             prompt_text = Text()
@@ -432,6 +441,7 @@ class cmd:
                         try:
                             cls = getattr(mod, user_input)
                             inst = cls()
+                            mes.show_notification(title="Starting Model...", description=f"Model {user_input} is Starting...", duration=2000, isOK=True)
                             result = inst.start()
 
                             # 检查返回值：单次任务不加入 enabled 列表，也不保存实例
@@ -443,15 +453,18 @@ class cmd:
                                 # 单次任务：不保存实例，直接继续
                                 pass
                         except Exception as e:
+                            mes.show_notification(title="Starting Model...", description=f"Failed to start model {user_input}", duration=2000, isOK=False)
                             print(f"Failed to start model {user_input}: {e}")
                     else:
                         try:
                             inst = self._running_models.pop(user_input)
+                            mes.show_notification(title="Stopping Model...", description=f"Model {user_input} is stopping...", duration=2000, isOK=True)
                             inst.stop()
                             # 停止时也需要检查返回值决定是否从 enabled 列表中移除
                             if user_input in self.conf['models']['enabled']:
                                 self.conf['models']['enabled'].remove(user_input)
                         except Exception as e:
+                            mes.show_notification(title="Error", description=f"Failed to stop model {user_input}", duration=2000, isOK=False)
                             print(f"Failed to stop model {user_input}: {e}")
                     with open("./config.toml", "w") as f:
                         toml.dump(self.conf, f)
