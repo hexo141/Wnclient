@@ -1,4 +1,4 @@
 AutoCheckUpdate = false
 
 [models]
-enabled = [ "fps", "cps", "keyb", "mousewin", "rains",]
+enabled = [ "fps", "cps", "keyb", "mousewin",]

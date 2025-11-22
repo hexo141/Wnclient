@@ -157,6 +157,14 @@ class MarqueeFPSWindow(QWidget):
         except Exception:
             p.fillRect(self.rect(), QColor(0, 0, 0))
 
+        # helper: dynamic rainbow color based on time
+        def rainbow_color(offset=0, alpha=255):
+            try:
+                h = int((time.time() * 80 + offset) % 360)
+                return QColor.fromHsv(h, 255, 255, alpha)
+            except Exception:
+                return QColor(255, 255, 255, alpha)
+
         # draw FPS text - this shows SCREEN refresh rate
         try:
             val = int(self.fps_value.value)
@@ -164,15 +172,8 @@ class MarqueeFPSWindow(QWidget):
             val = 0
         text = f"{val} FPS"
         p.setFont(self._font)
-        
-        # 根据帧率改变文字颜色
-        if val >= 120:
-            text_color = QColor(0, 255, 0)  # 绿色表示高刷新率
-        elif val >= 60:
-            text_color = QColor(255, 255, 0)  # 黄色表示中等刷新率
-        else:
-            text_color = QColor(255, 100, 100)  # 红色表示低刷新率
-            
+        # dynamic rainbow color (faster hue sweep for emphasis)
+        text_color = rainbow_color(offset=val * 3, alpha=220)
         p.setPen(text_color)
         rect_text = self.rect().adjusted(0, 0, 0, -2)
         p.drawText(rect_text, Qt.AlignCenter, text)
@@ -187,10 +188,8 @@ class MarqueeFPSWindow(QWidget):
         except Exception:
             p.drawRect(rect_border)
 
-        # draw marquee moving segment along perimeter
-        seg_color = QColor(255, 255, 255)
+        # draw marquee moving segment along perimeter with rainbow colors
         p.setPen(Qt.NoPen)
-        p.setBrush(seg_color)
 
         seg = int(self._segment_len)
         t = int(self._thickness)
@@ -200,7 +199,9 @@ class MarqueeFPSWindow(QWidget):
         w = self.width()
         h = self.height()
 
-        def draw_segment_at(pix, length):
+        def draw_segment_at(pix, length, hue_off):
+            col = rainbow_color(offset=hue_off, alpha=200)
+            p.setBrush(col)
             if pix < (w - 4):
                 x = 2 + pix
                 y = 2
@@ -224,9 +225,11 @@ class MarqueeFPSWindow(QWidget):
             p.drawRect(int(x), int(y), int(t), int(length))
 
         step = 4
+        idx = 0
         for i in range(0, seg, step):
             pix = (pos + i) % perim
-            draw_segment_at(pix, step)
+            draw_segment_at(pix, step, hue_off=idx * 12)
+            idx += 1
 
     # dragging
     def mousePressEvent(self, event):

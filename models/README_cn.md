@@ -25,5 +25,6 @@ return {"Wnclient": "Single mission"}
     }
 }
 ```
+### Wnclient是特有key，不能占用
 其中dependence是所需要的模块名，主程序启动时会让用户安装他
 其中platforms是所支持的平台，类型有windows, linux, darwin，全部小写

@@ -71,6 +71,14 @@ class CPSWindow(QWidget):
         except Exception:
             p.fillRect(self.rect(), QColor(0, 0, 0))
 
+        # helper: dynamic rainbow color
+        def rainbow_color(offset=0, alpha=255):
+            try:
+                h = int((time.time() * 80 + offset) % 360)
+                return QColor.fromHsv(h, 255, 255, alpha)
+            except Exception:
+                return QColor(255, 255, 255, alpha)
+
         # get value
         try:
             val = int(self.cps_value.value)
@@ -79,19 +87,23 @@ class CPSWindow(QWidget):
         text = f"{val} CPS"
 
         p.setFont(self._font)
-        p.setPen(QColor(255, 255, 255))
+        # text uses animated rainbow color
+        p.setPen(rainbow_color(offset=val * 6, alpha=230))
         rect = self.rect().adjusted(0, 0, 0, -2)
         p.drawText(rect, Qt.AlignCenter, text)
 
         # thin border (rounded)
-        base_color = QColor(255, 255, 255, 30)
-        p.setPen(base_color)
+        # thin neon border with rainbow hue
+        col = rainbow_color(offset=val * 10, alpha=140)
+        pen = col
+        pen.setAlpha(140)
+        p.setPen(col)
         p.setBrush(Qt.NoBrush)
-        rect = self.rect().adjusted(1, 1, -1, -1)
+        rectb = self.rect().adjusted(1, 1, -1, -1)
         try:
-            p.drawRoundedRect(rect.x(), rect.y(), rect.width(), rect.height(), 6, 6)
+            p.drawRoundedRect(rectb.x(), rectb.y(), rectb.width(), rectb.height(), 6, 6)
         except Exception:
-            p.drawRect(rect)
+            p.drawRect(rectb)
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:

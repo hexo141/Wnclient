@@ -222,6 +222,20 @@ class KeybWindow(QWidget):
 
         from PySide6.QtGui import QPen
 
+        # helper: dynamic rainbow color
+        def rainbow_color(offset=0, alpha=255):
+            try:
+                h = int((time.time() * 80 + offset) % 360)
+                return QColor.fromHsv(h, 255, 255, alpha)
+            except Exception:
+                return QColor(255, 255, 255, alpha)
+
+        # compute a single global hue that cycles with time so all keys share same color
+        try:
+            base_hue = int((time.time() * 80) % 360)
+        except Exception:
+            base_hue = 0
+
         for it in self._items:
             if it.x is None:
                 continue
@@ -231,7 +245,10 @@ class KeybWindow(QWidget):
 
             # draw main text
             p.setFont(self._font)
-            p.setPen(QColor(255, 255, 255))
+            # unified color for all keys (global rainbow cycle)
+            hue_off = base_hue
+            main_col = rainbow_color(offset=hue_off, alpha=230)
+            p.setPen(main_col)
             fm = p.fontMetrics()
             main_text = str(it.key)
             tx = x + self._item_padding
@@ -244,7 +261,9 @@ class KeybWindow(QWidget):
                 # compute small font and position
                 small_font = QFont(self._font.family(), small_ps)
                 p.setFont(small_font)
-                p.setPen(QColor(200, 200, 200))
+                # smaller count uses same hue but slightly dimmer
+                count_col = rainbow_color(offset=hue_off, alpha=180)
+                p.setPen(count_col)
                 fm_s = QFontMetrics(small_font)
                 small_text = f"x{it.count}"
                 main_w = fm.horizontalAdvance(main_text)
@@ -256,7 +275,14 @@ class KeybWindow(QWidget):
             # draw border (rounded) around the item using stored width
             try:
                 item_w = int(getattr(it, 'width', 0))
-                pen = QPen(QColor(255, 255, 255, 120))
+                # draw soft neon/glow behind
+                glow_col = rainbow_color(offset=hue_off, alpha=60)
+                p.setPen(Qt.NoPen)
+                p.setBrush(glow_col)
+                p.drawRoundedRect(x - 2, y - 2, item_w + 4, int(h) + 4, 8, 8)
+
+                # outline with brighter neon
+                pen = QPen(rainbow_color(offset=hue_off, alpha=200))
                 pen.setWidth(1)
                 p.setPen(pen)
                 p.setBrush(Qt.NoBrush)
