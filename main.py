@@ -4,7 +4,6 @@
 
 import subprocess
 import sys
-import mes
 try:
     import toml
     from rich.console import Console
@@ -24,11 +23,23 @@ try:
 except ImportError as e:
     print(f"Missing module: {e.name}. Attempting to install...")
     try:
+        import uv
+    except ImportError as e:
+        print(e)
+        if hasattr(sys, 'real_prefix'):
+            print("当前在虚拟环境中,请先退出虚拟环境")
+            sys.exit(0)
         subprocess.check_call([sys.executable, "-m", "pip", "install", "uv"])
     except subprocess.CalledProcessError as e:
         print(f"Failed to install uv module: {e}")
         sys.exit(1)
+    else:
+        print("安装完成，请重新启动脚本")
+        sys.exit(0)
     try:
+        if not hasattr(sys, 'real_prefix'):
+            if input("您现在系统环境中运行Wnclient,我们不建议，是否继续(y/n)?").lower() == "n":
+                sys.exit(0)
         subprocess.check_call(["uv","pip","install","--requirement","requirements.txt","--python",sys.executable])
     except subprocess.CalledProcessError as e:
         print(f"Failed to install dependencies: {e}")
@@ -37,6 +48,7 @@ except ImportError as e:
         print("依赖安装完成，请重启应用程序。")
         print("Dependencies installed. Please restart the application.")
         sys.exit(0)
+import mes
 client_config = toml.load("config.toml")
 class SquarePixmapLabel(QLabel):
     """自定义方形图片标签"""
@@ -478,4 +490,5 @@ if __name__ == "__main__":
         Update_task.start()
 
     command = cmd()
+
     command.cmd()
