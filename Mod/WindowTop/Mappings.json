@@ -1,0 +1,4 @@
+{
+    "set_window_topmost_by_title": {"func": "set_window_topmost_by_title", "Parameters": {"window_title": {"type":"str","isRequired":true}}},
+    "unset_window_topmost_by_title": {"func": "unset_window_topmost_by_title", "Parameters": {"window_title": {"type":"str","isRequired":true}}}
+}

@@ -1,0 +1,6 @@
+Name = "NE_Name"
+Version = "1.0.0"
+Description = "A random name generator"
+Author = "Wnclient Dev Team"
+Dependence = ["rich"]
+platforms = ["Windows", "Linux", "Darwin"]

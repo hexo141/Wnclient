@@ -1,0 +1,4 @@
+{
+    "inject_by_window_title": {"func": "inject_by_window_title","Parameters": {"window_title":{"type":"str","isRequired":true},"dll_path":{"type":"str","isRequired":true}}},
+    "inject_by_process_id": {"func": "inject_by_process_id","Parameters": {"process_id":{"type":"int","isRequired":true},"dll_path":{"type":"str","isRequired":true}}}
+}

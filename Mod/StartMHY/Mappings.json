@@ -1,0 +1,3 @@
+{
+    "StartGame": {"func": "StartGame","Parameters": {"UseJson":{"type":"bool","isRequired":false},"GamePath":{"type":"str","isRequired":true},"UseTouch":{"type":"bool","isRequired":false}}}
+}

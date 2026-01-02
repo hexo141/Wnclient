@@ -1,0 +1,6 @@
+Name = "WindowTop"
+Version = "1.0.0"
+Description = "Set window to topmost for better visibility"
+Author = "Wnclient Dev Team"
+Dependence = ["ctypes"]
+platforms = ["Windows"]

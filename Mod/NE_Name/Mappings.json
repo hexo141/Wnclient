@@ -1,0 +1,3 @@
+{
+    "generate_random_nickname": {"func": "generate_random_nickname","Parameters": {"data_dir":{"type":"str","isRequired":false},"structure_key":{"type":"str","isRequired":false}}}
+}

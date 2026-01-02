@@ -1,0 +1,30 @@
+{
+    "Dll_injector": {
+        "path": "Mod/Dll_injector/Dll_injector.py",
+        "mappings": "Mod/Dll_injector/Mappings.json",
+        "toml": "Mod/Dll_injector/Wnclient.toml",
+        "Enabled": true,
+        "AutoLoad": false
+    },
+    "StartMHY": {
+        "path": "Mod/StartMHY/StartMHY.py",
+        "mappings": "Mod/StartMHY/Mappings.json",
+        "toml": "Mod/StartMHY/Wnclient.toml",
+        "Enabled": true,
+        "AutoLoad": false
+    },
+    "WindowTop": {
+        "path": "Mod/WindowTop/WindowTop.py",
+        "mappings": "Mod/WindowTop/Mappings.json",
+        "toml": "Mod/WindowTop/Wnclient.toml",
+        "Enabled": true,
+        "AutoLoad": false
+    },
+    "NE_Name": {
+        "path": "Mod/NE_Name/Ne_Name.py",
+        "mappings": "Mod/NE_Name/Mappings.json",
+        "toml": "Mod/NE_Name/Wnclient.toml",
+        "Enabled": true,
+        "AutoLoad": false
+    }
+}

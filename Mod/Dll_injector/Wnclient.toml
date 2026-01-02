@@ -1,0 +1,6 @@
+Name = "Dll_injector"
+Version = "1.0.0"
+Description = "A simple DLL injector for Windows applications"
+Author = "Wnclient Dev Team"
+Dependence = ["pywin32", "keyboard"]
+platforms = ["Windows"]
