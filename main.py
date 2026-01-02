@@ -28,6 +28,9 @@ def load_mods(modlist_path='Modlist.json',mod_name="*",type="Normal"):
         mods_to_load = modlist.keys()
     else:
         mods_to_load = [mod_name] if mod_name in modlist else []
+        if mod_name not in modlist:
+            lwjgl.error(f"Mod {mod_name} not found in modlist.")
+            return
     for mod_name in mods_to_load:
         mod_path = modlist[mod_name]['path']
         mod_mappings_path = modlist[mod_name]['mappings']
