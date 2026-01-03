@@ -151,11 +151,8 @@ class RainCanvas:
         )
         self.canvas.pack(fill=tk.BOTH, expand=True)
         
-        # 创建雨滴引擎
+
         self.rain_engine = HighPerformanceRain(width, height)
-        
-        # 绑定退出键
-        self.canvas.bind("<Escape>", lambda e: _rain_stop_event.set())
         self.canvas.focus_set()
         
         # 当前显示的图形项
@@ -165,7 +162,7 @@ class RainCanvas:
         self.animate()
     
     def animate(self):
-        """动画循环"""
+
         # 检查是否需要停止
         if _rain_stop_event.is_set():
             self.cleanup()
@@ -189,12 +186,12 @@ class RainCanvas:
             self.root.after(self.rain_engine.frame_delay, self.animate)
             
         except tk.TclError:
-            pass  # Tkinter已经关闭，正常退出
+            pass 
         except Exception as e:
-            print(f"动画循环异常: {e}")
+            print(e)
     
     def cleanup(self):
-        """清理资源"""
+
         try:
             if self.current_items:
                 self.canvas.delete(*self.current_items)
@@ -203,7 +200,7 @@ class RainCanvas:
             pass  # 画布已销毁
 
 def create_rain_window():
-    """创建并运行雨滴窗口"""
+
     global _rain_root
     
     try:
@@ -278,25 +275,24 @@ def WindowRain(enable=True):
         _rain_stop_event.clear()
         _rain_active = True
         
-        print("启动雨滴效果...")
+
         
         # 创建并启动雨滴线程
         _rain_thread = threading.Thread(target=create_rain_window, daemon=True)
         _rain_thread.start()
         
         # 等待窗口创建完成
-        for _ in range(30):  # 最多等待3秒
+        for _ in range(30): 
             if _rain_root is not None:
                 break
             time.sleep(0.1)
         
     else:
-        # 在主线程中调用安全停止
+
         _safe_stop()
 
-# 注册退出时的清理函数
+
 def cleanup_on_exit():
-    """程序退出时清理资源"""
     if _rain_active:
         WindowRain(enable=False)
 
