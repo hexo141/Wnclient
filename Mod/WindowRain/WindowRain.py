@@ -2,7 +2,8 @@ import sys
 import random
 import math
 import threading
-from PySide6.QtCore import Qt, QTimer
+import time
+from PySide6.QtCore import Qt, QTimer, Signal, QObject
 from PySide6.QtGui import QPainter, QColor, QPen
 from PySide6.QtWidgets import QApplication, QWidget
 
@@ -104,6 +105,9 @@ class RainDrop:
 
 class RainWindow(QWidget):
     """Main window class"""
+    # 定义一个信号，用于请求关闭窗口
+    close_requested = Signal()
+    
     def __init__(self):
         super().__init__()
         
@@ -141,6 +145,9 @@ class RainWindow(QWidget):
         self.timer.timeout.connect(self.update_raindrops)
         self.timer.start(16)  # ~60FPS
         
+        # Connect close_requested signal to close method
+        self.close_requested.connect(self.close)
+        
         # Performance monitoring
         self.frame_count = 0
         self.last_log_time = 0
@@ -165,9 +172,6 @@ class RainWindow(QWidget):
                 return
                 
             self.frame_count += 1
-            
-
-                
                 
             for raindrop in self.raindrops:
                 raindrop.update()
@@ -214,28 +218,40 @@ class RainWindow(QWidget):
 _rain_app = None
 _rain_thread = None
 _rain_window = None
+_rain_app_running = False
 
 
 def _run_qt_app():
     """在独立线程中运行Qt应用的函数"""
-    global _rain_app, _rain_window
+    global _rain_app, _rain_window, _rain_app_running
     
-    # 创建QApplication实例
-    _rain_app = QApplication(sys.argv)
-    
-    # 创建窗口
-    _rain_window = RainWindow()
-    _rain_window.show()
-    
-    print("Rain window started in separate thread")
-    
-    # 运行Qt事件循环
-    _rain_app.exec()
+    try:
+        # 创建QApplication实例
+        _rain_app = QApplication(sys.argv)
+        _rain_app_running = True
+        
+        # 创建窗口
+        _rain_window = RainWindow()
+        _rain_window.show()
+        
+        print("Rain window started in separate thread")
+        
+        # 运行Qt事件循环
+        _rain_app.exec()
+        
+    except Exception as e:
+        print(f"Error in Qt application: {e}")
+    finally:
+        # 确保资源被清理
+        _rain_app_running = False
+        _rain_app = None
+        _rain_window = None
+        print("Qt application thread finished")
 
 
 def WindowRain(enable=True):
     """控制雨滴效果的主函数"""
-    global _rain_app, _rain_thread, _rain_window
+    global _rain_app, _rain_thread, _rain_window, _rain_app_running
     
     if enable:
         if _rain_thread is not None and _rain_thread.is_alive():
@@ -248,28 +264,73 @@ def WindowRain(enable=True):
         _rain_thread = threading.Thread(target=_run_qt_app, daemon=True)
         _rain_thread.start()
         
+        # 等待一段时间确保Qt应用启动
+        for i in range(10):
+            if _rain_app_running:
+                break
+            time.sleep(0.1)
+        
         print("Rain effect started. Press ESC in the rain window to close.")
         
     else:
         print("Stopping rain effect")
         
+        # 尝试关闭窗口
         if _rain_window is not None:
             try:
-                if QApplication.instance() is not None:
-                    _rain_window.close()
-                    _rain_window = None
+                # 使用信号/槽机制安全地关闭窗口（线程安全）
+                _rain_window.close_requested.emit()
+                print("Close request emitted")
             except Exception as e:
-                print(f"Error closing rain window: {e}")
+                print(f"Error emitting close signal: {e}")
         
-        if _rain_app is not None:
-            try:
-                _rain_app.quit()
-            except:
-                pass
+        # 等待一段时间让窗口关闭
+        if _rain_thread is not None and _rain_thread.is_alive():
+            print("Waiting for Qt thread to finish...")
+            # 等待最多2秒
+            for i in range(20):
+                if not _rain_thread.is_alive():
+                    break
+                time.sleep(0.1)
+            
+            if _rain_thread.is_alive():
+                print("Qt thread still alive, but will exit as daemon when main program exits")
         
+        # 重置全局变量
+        _rain_app = None
         _rain_thread = None
+        _rain_window = None
+        
         print("Rain effect stopped")
 
 
+# 为了方便使用，可以添加一个简单的清理函数
+def cleanup():
+    """清理函数，用于程序退出时确保资源被释放"""
+    WindowRain(enable=False)
+
+
 if __name__ == "__main__":
+    import atexit
+    
+    # 注册清理函数
+    atexit.register(cleanup)
+    
     WindowRain(enable=True)
+    
+    # 添加一个简单的命令行界面来测试关闭功能
+    try:
+        while True:
+            cmd = input("\nEnter 'stop' to stop rain effect, 'start' to start, or 'exit' to quit: ").strip().lower()
+            if cmd == 'stop':
+                WindowRain(enable=False)
+            elif cmd == 'start':
+                WindowRain(enable=True)
+            elif cmd == 'exit':
+                WindowRain(enable=False)
+                break
+            else:
+                print("Unknown command")
+    except KeyboardInterrupt:
+        print("\nProgram interrupted, cleaning up...")
+        WindowRain(enable=False)
