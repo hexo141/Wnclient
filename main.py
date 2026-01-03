@@ -98,24 +98,30 @@ def UseMod(mod_name, func="", args=None, **kwargs):
     if func.strip() == "":
         func_options = list(mod_mappings.keys())
         selected = 0
-        while True:
-            rich.print(f"\n[bold]Please select a func ({mod_name}): [/bold]")
-            for idx, option in enumerate(func_options):
-                if idx == selected:
-                    rich.print(f"> [bold green]{option}[/bold green]")
-                else:
-                    rich.print(f"  {option}")
-            key = readchar.readkey()
-            if key in (readchar.key.UP, 'w'):
-                selected = (selected - 1) % len(func_options)
-            elif key in (readchar.key.DOWN, 's'):
-                selected = (selected + 1) % len(func_options)
-            elif key in ('\r', '\n', readchar.key.ENTER):
-                func = func_options[selected]
-                break
-            # 清屏重绘
-            import os
-            os.system('cls' if os.name == 'nt' else 'clear')
+        if len(func_options) == 0:
+            lwjgl.error(f"No functions available in mappings for mod '{mod_name}'")
+            return
+        if len(func_options) != 1:
+            while True:
+                rich.print(f"\n[bold]Please select a func ({mod_name}): [/bold]")
+                for idx, option in enumerate(func_options):
+                    if idx == selected:
+                        rich.print(f"> [bold green]{option}[/bold green]")
+                    else:
+                        rich.print(f"  {option}")
+                key = readchar.readkey()
+                if key in (readchar.key.UP, 'w'):
+                    selected = (selected - 1) % len(func_options)
+                elif key in (readchar.key.DOWN, 's'):
+                    selected = (selected + 1) % len(func_options)
+                elif key in ('\r', '\n', readchar.key.ENTER):
+                    func = func_options[selected]
+                    break
+                # 清屏重绘
+                import os
+                os.system('cls' if os.name == 'nt' else 'clear')
+        else:
+            func = func_options[0]
     if func not in mod_mappings:
         lwjgl.error(f"Function '{func}' not found in mappings for mod '{mod_name}'")
         return
