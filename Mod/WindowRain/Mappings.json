@@ -1,0 +1,3 @@
+{
+    "WindowRain": {"func": "WindowRain","Parameters": {"enable":{"type":"bool","isRequired":true}}}
+}

@@ -26,5 +26,12 @@
         "toml": "Mod/NE_Name/Wnclient.toml",
         "Enabled": true,
         "AutoLoad": false
+    },
+    "WindowRain": {
+        "path": "Mod/WindowRain/WindowRain.py",
+        "mappings": "Mod/WindowRain/Mappings.json",
+        "toml": "Mod/WindowRain/Wnclient.toml",
+        "Enabled": true,
+        "AutoLoad": false
     }
 }

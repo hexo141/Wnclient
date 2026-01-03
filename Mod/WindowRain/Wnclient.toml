@@ -1,0 +1,6 @@
+Name = "WindowRain"
+Version = "1.0.0"
+Description = "Mimic the effect of rain on the tabletop"
+Author = "Wnclient Dev Team"
+Dependence = ["pyopengl"]
+platforms = ["Windows"]
