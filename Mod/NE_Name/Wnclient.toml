@@ -4,3 +4,4 @@ Description = "A random name generator"
 Author = "Wnclient Dev Team"
 Dependence = ["rich"]
 platforms = ["Windows", "Linux", "Darwin"]
+UseThreads = false

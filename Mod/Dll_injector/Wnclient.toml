@@ -4,3 +4,4 @@ Description = "A simple DLL injector for Windows applications"
 Author = "Wnclient Dev Team"
 Dependence = ["pywin32", "keyboard"]
 platforms = ["Windows"]
+UseThreads = false

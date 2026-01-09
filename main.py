@@ -43,7 +43,8 @@ def load_mods(modlist_path='Modlist.json',mod_name="*",type="Normal"):
                 continue
             if type == "AutoLoad":
                 autoload = modlist[mod_name].get('AutoLoad', False)
-                if not autoload:
+                enable_threads = toml.load(open(mod_toml_path)).get('UseThreads', False)
+                if (not autoload) and (enable_threads is False):
                     continue
             lwjgl.info(f"Loading mod: {mod_name} | Version: {toml.load(open(mod_toml_path)).get('Version', 'N/A')} | Author: {toml.load(open(mod_toml_path)).get('Author', 'Unknown')}")
             try:

@@ -4,3 +4,4 @@ Description = "Start Genshin Impact with custom settings"
 Author = "Wnclient Dev Team"
 Dependence = ["tk"]
 platforms = ["Windows"]
+UseThreads = true

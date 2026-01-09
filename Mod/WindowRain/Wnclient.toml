@@ -4,3 +4,4 @@ Description = "Mimic the effect of rain on the tabletop"
 Author = "Wnclient Dev Team"
 Dependence = ["pyopengl"]
 platforms = ["Windows"]
+UseThreads = true
