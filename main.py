@@ -44,7 +44,7 @@ def load_mods(modlist_path='Modlist.json',mod_name="*",type="Normal"):
             if type == "AutoLoad":
                 autoload = modlist[mod_name].get('AutoLoad', False)
                 enable_threads = toml.load(open(mod_toml_path)).get('UseThreads', False)
-                if (not autoload) and (enable_threads is False):
+                if (autoload is False) or (enable_threads is False):
                     continue
             lwjgl.info(f"Loading mod: {mod_name} | Version: {toml.load(open(mod_toml_path)).get('Version', 'N/A')} | Author: {toml.load(open(mod_toml_path)).get('Author', 'Unknown')}")
             try:
@@ -193,6 +193,7 @@ def main():
         rich.print("[bold blue]Wnclient> [/bold blue]", end="")
         input_command = input("")
         if input_command.lower() in ['exit', 'quit']:
+            isExiting = True
             sys.exit(0)
         else:
             if input_command.strip() == "":
@@ -218,4 +219,9 @@ def main():
             else:
                 lwjgl.error(f"Unknown command: {input_command}")
 if __name__ == "__main__":
-    main()
+    isExiting = False
+    while isExiting is False:
+        try:
+            main()
+        except KeyboardInterrupt:
+            print("\nPlease use 'exit' or 'quit' command to exit the program.")
