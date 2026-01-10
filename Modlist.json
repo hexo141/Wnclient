@@ -33,5 +33,12 @@
         "toml": "Mod/WindowRain/Wnclient.toml",
         "Enabled": true,
         "AutoLoad": false
+    },
+    "NeoFetch": {
+        "path": "Mod/NeoFetch/NeoFetch.py",
+        "mappings": "Mod/NeoFetch/Mappings.json",
+        "toml": "Mod/NeoFetch/Wnclient.toml",
+        "Enabled": true,
+        "AutoLoad": false
     }
 }

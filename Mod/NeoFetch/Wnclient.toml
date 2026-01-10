@@ -1,0 +1,7 @@
+Name = "NeoFetch"
+Version = "1.0.0"
+Description = "Show system information in a visually appealing way"
+Author = "Wnclient Dev Team"
+Dependence = ["psutil", "rich","screeninfo"]
+platforms = ["Windows","Linux", "Darwin"]
+UseThreads = false
