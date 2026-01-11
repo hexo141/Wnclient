@@ -8,6 +8,11 @@ import datetime
 import screeninfo
 import GPUtil
 import time
+from PIL import Image
+import requests
+from io import BytesIO
+import numpy as np
+
 def get_gpu_info_gputil():
     try:
         gpus = GPUtil.getGPUs()
@@ -30,7 +35,6 @@ def get_gpu_info_gputil():
     except Exception as e:
         print(f"{e}")
         return []
-
 
 gpus = get_gpu_info_gputil()
 
@@ -134,75 +138,185 @@ def create_progress_bar(percentage, width=20):
     bar += "[grey]" + "█" * (width - filled) + "[/grey]"
     return bar
 
-def main():
-    # 创建主面板
+def image_to_ascii_colored(image_url_or_path, max_width=40):
+    """
+    Convert an image to colored ASCII art using Unicode block characters
+    with proper aspect ratio correction for terminal characters
+    Returns a list of colored strings for each line
+    """
+    try:
+        # Load image from URL or local path
+        if image_url_or_path.startswith(('http://', 'https://')):
+            response = requests.get(image_url_or_path)
+            img = Image.open(BytesIO(response.content))
+        else:
+            img = Image.open(image_url_or_path)
+        
+        # Convert to RGB if needed
+        img = img.convert('RGB')
+        
+        # Get original dimensions
+        original_width, original_height = img.size
+        
+        # Terminal characters are about 2 times taller than wide
+        # To maintain aspect ratio, we need to adjust height by factor 0.5
+        terminal_char_aspect_ratio = 2.0  # Character height/width ratio
+        
+        # Calculate new dimensions preserving aspect ratio
+        aspect_ratio = original_height / original_width
+        
+        # Adjust for terminal character aspect ratio
+        new_width = max_width
+        # Formula: new_height = (original_height / original_width) * new_width / terminal_char_aspect_ratio
+        new_height = int(aspect_ratio * new_width / terminal_char_aspect_ratio)
+        
+        # Ensure minimum height
+        if new_height < 10:
+            new_height = 10
+            
+        # Ensure maximum height (can adjust based on your needs)
+        max_height = 40
+        if new_height > max_height:
+            new_height = max_height
+            # Recalculate width to maintain aspect ratio
+            new_width = int(new_height * terminal_char_aspect_ratio / aspect_ratio)
+        
+        # Resize image with high-quality resampling
+        img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
+        
+        # Define Unicode block characters with different fill levels
+        # Using full block characters for better density
+        chars = ["█", "▓", "▒", "░", " "]
+        
+        # Convert to ASCII art with colors
+        ascii_lines = []
+        pixels = np.array(img)
+        
+        for row in pixels:
+            line_parts = []
+            for pixel in row:
+                r, g, b = pixel
+                # Calculate brightness and select character
+                brightness = 0.299 * r + 0.587 * g + 0.114 * b  # Human perception formula
+                
+                # Map brightness to character index (0-4)
+                char_index = int(brightness / 51)  # 51 = 255/5
+                char_index = min(4, max(0, char_index))
+                
+                # Reverse so brighter pixels get more filled characters
+                char_index = 4 - char_index
+                char = chars[char_index]
+                
+                # Convert to hex color
+                hex_color = f"#{r:02x}{g:02x}{b:02x}"
+                
+                # Create colored character
+                line_parts.append(f"[{hex_color}]{char}[/{hex_color}]")
+            
+            ascii_lines.append("".join(line_parts))
+        
+        return ascii_lines
+    
+    except Exception as e:
+        print(f"Error loading image: {e}")
+        # Return a placeholder ASCII art
+        return [
+            "[#FF0000]█[/#FF0000][#FF6600]█[/#FF6600][#FFCC00]█[/#FFCC00][#00FF00]█[/#00FF00][#0066FF]█[/#0066FF][#6600FF]█[/#6600FF]",
+            "[#FF0000]No Image[/#FF0000][#FF6600] Loaded[/#FF6600]",
+            "[#00FF00]Use:[/#00FF00] python script.py --image path/to/image.jpg"
+        ]
+
+def display_system_info_with_image(info_lines, image_lines, image_width=40):
+    """Display system info with ASCII image on the left"""
     console = rich.get_console()
     
-    # 标题
-    rich.print(f"[bold red]{os.getlogin()}[/bold red] @ [bold red]{socket.gethostname()}[/bold red]")
-    rich.print("[bold cyan]" + "─" * 40 + "[/bold cyan]")
+    # Calculate maximum height needed
+    max_height = max(len(info_lines), len(image_lines))
     
-    # 基本信息
+    # Pad both lists to the same height
+    image_lines_padded = list(image_lines) + [""] * (max_height - len(image_lines))
+    info_lines_padded = list(info_lines) + [""] * (max_height - len(info_lines))
+    
+    # Display side by side
+    for i, (img_line, info_line) in enumerate(zip(image_lines_padded, info_lines_padded)):
+        # Print image on left (with fixed width), then system info
+        console.print(f"{img_line:<{image_width}}  {info_line}")
+
+def get_system_info_lines():
+    """Get all system information as a list of formatted lines"""
+    info_lines = []
+    
+    # Title
+    info_lines.append(f"[bold red]{os.getlogin()}[/bold red] @ [bold red]{socket.gethostname()}[/bold red]")
+    info_lines.append("[bold cyan]" + "─" * 40 + "[/bold cyan]")
+    
+    # Basic information
     info = get_terminal_and_shell()
-    rich.print(f"[bold yellow]OS:[/bold yellow] {platform.platform()}")
-    rich.print(f"[bold yellow]Kernel:[/bold yellow] {platform.release()}")
-    rich.print(f"[bold yellow]Process:[/bold yellow] {len(psutil.pids())}")
+    info_lines.append(f"[bold yellow]OS:[/bold yellow] {platform.platform()}")
+    info_lines.append(f"[bold yellow]Kernel:[/bold yellow] {platform.release()}")
+    info_lines.append(f"[bold yellow]Process:[/bold yellow] {len(psutil.pids())}")
     
     uptime = datetime.datetime.now() - datetime.datetime.fromtimestamp(psutil.boot_time())
-    rich.print(f"[bold yellow]Uptime:[/bold yellow] {uptime}")
-    rich.print(f"[bold yellow]Shell:[/bold yellow] {info.get('shell')}")
-    rich.print(f"[bold yellow]Terminal:[/bold yellow] {info.get('terminal')}")
+    uptime_str = str(uptime).split('.')[0]  # Remove microseconds
+    info_lines.append(f"[bold yellow]Uptime:[/bold yellow] {uptime_str}")
+    info_lines.append(f"[bold yellow]Shell:[/bold yellow] {info.get('shell')}")
+    info_lines.append(f"[bold yellow]Terminal:[/bold yellow] {info.get('terminal')}")
     
-    # CPU信息
+    # CPU information
     cpu_percent = psutil.cpu_percent(interval=0.1)
-    rich.print(f"[bold yellow]CPU:[/bold yellow] {platform.processor()}")
-    rich.print(f"    [green]->[/green] Usage: {create_progress_bar(cpu_percent)} {cpu_percent:.1f}%")
-    rich.print(f"    [green]->[/green] Machine: {platform.machine()}")
+    info_lines.append(f"[bold yellow]CPU:[/bold yellow] {platform.processor()}")
+    info_lines.append(f"    [green]->[/green] Usage: {create_progress_bar(cpu_percent)} {cpu_percent:.1f}%")
+    info_lines.append(f"    [green]->[/green] Machine: {platform.machine()}")
     
-    # 显示器信息
+    # Display information
     monitors = screeninfo.get_monitors()
-    rich.print(f"[bold yellow]Screen[/bold yellow] ({len(monitors)}):")
+    info_lines.append(f"[bold yellow]Screen[/bold yellow] ({len(monitors)}):")
     for i, monitor in enumerate(monitors):
-        rich.print(f"    [green]->[/green] Display {i}: {monitor.name} ([bold blue]{monitor.width}x{monitor.height}[/bold blue])")
+        info_lines.append(f"    [green]->[/green] Display {i}: {monitor.name} ([bold blue]{monitor.width}x{monitor.height}[/bold blue])")
 
+    # GPU information
     if gpus:
-        rich.print(f"[bold yellow]GPU[/bold yellow] ({len(gpus)}):")
+        info_lines.append(f"[bold yellow]GPU[/bold yellow] ({len(gpus)}):")
         for gpu in gpus:
             gpu_load = gpu['load']
             vram_percent = (gpu['memory_used'] / gpu['memory_total']) * 100 if gpu['memory_total'] > 0 else 0
             
-            # GPU计算负载进度条
-            rich.print(f"    [green]->[/green] GPU {gpu['id']}: {gpu['name']}")
-            rich.print(f"       Load: {create_progress_bar(gpu_load)} {gpu_load:.1f}%")
+            # GPU compute load progress bar
+            info_lines.append(f"    [green]->[/green] GPU {gpu['id']}: {gpu['name']}")
+            info_lines.append(f"       Load: {create_progress_bar(gpu_load)} {gpu_load:.1f}%")
             
-            # VRAM使用进度条
-            rich.print(f"       VRAM: {create_progress_bar(vram_percent)} {gpu['memory_used']:.0f}/{gpu['memory_total']:.0f} MB ({vram_percent:.1f}%)")
+            # VRAM usage progress bar
+            info_lines.append(f"       VRAM: {create_progress_bar(vram_percent)} {gpu['memory_used']:.0f}/{gpu['memory_total']:.0f} MB ({vram_percent:.1f}%)")
             
-            # 温度信息
+            # Temperature information
             if gpu['temperature']:
                 temp = gpu['temperature']
                 temp_color = "green" if temp < 70 else "yellow" if temp < 85 else "red"
-                rich.print(f"       Temp: [{temp_color}]{temp:.1f}°C[/{temp_color}]")
+                info_lines.append(f"       Temp: [{temp_color}]{temp:.1f}°C[/{temp_color}]")
     else:
-        rich.print("[bold yellow]GPU:[/bold yellow] No GPU detected")
+        info_lines.append("[bold yellow]GPU:[/bold yellow] No GPU detected")
 
-    rich.print("[bold yellow]Memory:[/bold yellow]")
+    # Memory information
+    info_lines.append("[bold yellow]Memory:[/bold yellow]")
     memory_info = get_memory_info_psutil()
 
     ram_percent = memory_info['percent']
     ram_bar = create_progress_bar(ram_percent)
-    rich.print(f"    [green]->[/green] RAM: {ram_bar} {ram_percent:.1f}%")
-    rich.print(f"       Used: {memory_info['used']} GB / Total: {memory_info['total']} GB")
-    rich.print(f"       Available: {memory_info['available']} GB | Free: {memory_info['free']} GB")
+    info_lines.append(f"    [green]->[/green] RAM: {ram_bar} {ram_percent:.1f}%")
+    info_lines.append(f"       Used: {memory_info['used']} GB / Total: {memory_info['total']} GB")
+    info_lines.append(f"       Available: {memory_info['available']} GB | Free: {memory_info['free']} GB")
     
-
+    # Swap memory
     if float(memory_info['swap_total'].replace('N/A', '0')) > 0:
         swap_percent = memory_info['swap_percent']
         swap_bar = create_progress_bar(swap_percent)
-        rich.print(f"    [green]->[/green] Swap: {swap_bar} {swap_percent:.1f}%")
-        rich.print(f"       Used: {memory_info['swap_used']} GB / Total: {memory_info['swap_total']} GB")
+        info_lines.append(f"    [green]->[/green] Swap: {swap_bar} {swap_percent:.1f}%")
+        info_lines.append(f"       Used: {memory_info['swap_used']} GB / Total: {memory_info['swap_total']} GB")
     
-    print("\n")
+    info_lines.append("")  # Empty line
+    
+    # Disk information
+    disk_count = 0
     for partition in psutil.disk_partitions():
         try:
             usage = psutil.disk_usage(partition.mountpoint)
@@ -212,19 +326,71 @@ def main():
             used_gb = usage.used / (1024**3)
             total_gb = usage.total / (1024**3)
             
-            rich.print(
-                    f"[bold]{partition.device}[/]  [cyan]{partition.mountpoint}[/]",
-                    disk_bar,
-                    f"[green]{used_gb:.1f}[/]/[bold]{total_gb:.1f} GB[/]  "
-                    f"[{'green' if percent < 70 else 'yellow' if percent < 90 else 'red'}]{percent:.1f}%[/]"
-                )
+            info_lines.append(
+                f"[bold]{partition.device}[/]  [cyan]{partition.mountpoint}[/]  "
+                f"{disk_bar}  "
+                f"[green]{used_gb:.1f}[/]/[bold]{total_gb:.1f} GB[/]  "
+                f"[{'green' if percent < 70 else 'yellow' if percent < 90 else 'red'}]{percent:.1f}%[/]"
+            )
+            disk_count += 1
         except:
             continue
-    print("\n")
+    
+    if disk_count == 0:
+        info_lines.append("[yellow]No disk information available[/yellow]")
+    
+    info_lines.append("")  # Empty line
+    
+    # Network information
     connections = len(psutil.net_connections())
-    rich.print(f"[bold yellow]Network Connections:[/bold yellow] {connections}")
+    info_lines.append(f"[bold yellow]Network Connections:[/bold yellow] {connections}")
 
     upload, download = get_network_speed()
-    rich.print(f"[bold yellow]Network Speed:[/bold yellow]\n    [green]->[/green] Upload: {upload}\n    [green]->[/green] Download: {download}\n")
+    info_lines.append(f"[bold yellow]Network Speed:[/bold yellow]")
+    info_lines.append(f"    [green]->[/green] Upload: {upload}")
+    info_lines.append(f"    [green]->[/green] Download: {download}")
+    
+    return info_lines
+
+def main(image_url_or_path=None):
+    # Create main panel
+    console = rich.get_console()
+    
+    # Get terminal size for better layout
+    terminal_size = console.size
+    terminal_width = terminal_size.width
+    terminal_height = terminal_size.height
+    
+    # Calculate image width based on terminal size
+    # Use about 1/3 of terminal width for image, maximum 40 characters
+    image_width = min(40, terminal_width // 3)
+    
+    # Generate ASCII image if provided
+    image_lines = []
+    if image_url_or_path:
+        image_lines = image_to_ascii_colored(image_url_or_path, max_width=image_width)
+    
+    # Get system information lines
+    info_lines = get_system_info_lines()
+    
+    # Display with image if provided, otherwise just system info
+    if image_url_or_path and image_lines:
+        display_system_info_with_image(info_lines, image_lines, image_width)
+    else:
+        for line in info_lines:
+            console.print(line)
+
 if __name__ == "__main__":
-    main()
+    import sys
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='Display system information with optional image')
+    parser.add_argument('--image', '-i', help='Path or URL to an image file')
+    
+    args = parser.parse_args()
+    
+    if args.image:
+        main(args.image)
+    else:
+        # Run without image
+        main()
