@@ -1,5 +1,5 @@
 # Wnclient 使用指南
-
+##### 只是个缝合怪罢了
 ## 环境要求
 - **操作系统**: Windows 系统（推荐）
 - **Python版本**: 建议使用 Python 3.11.4
@@ -61,3 +61,10 @@ python main.py
 
 ### Q: Why are updates slow?
 **A**: The developer is currently busy with code optimization, interface beautification, and providing documentation in both Chinese and English languages.
+
+
+
+## 使用到的相关url:
+1. https://github.com/wang-yupu/netease_mc_name_generator   
+2. https://github.com/RedCursorSecurityConsulting/PPLKiller
+3. https://github.com/itm4n/PPLcontrol

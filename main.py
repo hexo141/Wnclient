@@ -6,6 +6,11 @@ import sys
 import json
 import subprocess
 import platform
+import zipfile
+import shutil
+import os
+import Run_As_Admin
+import argparse
 try:
     import toml
     import importlib
@@ -17,10 +22,39 @@ except ImportError as e:
     setup.Setup()
     print("[Info] Required packages installed. Please re-run the program.")
     sys.exit(0)
+try:
+    if os.path.exists("./Temp"):
+        lwjgl.info("Del temp")
+        shutil.rmtree("./Temp/")
+    os.makedirs("./Temp")
+except Exception as e:
+    lwjgl.warning(f"Can not delete some file: {e}")
+
+parser = argparse.ArgumentParser(description='A specail client!')
+
+# 添加参数
+parser.add_argument('-command', help='Quick use Command')
+cmd_args = parser.parse_args()
+
+def set_ppl():
+    if platform.system() == 'Windows':
+            Run_As_Admin.Run_As_Admin(command="-command set_ppl")
+            with zipfile.ZipFile('Sys/RTCore64.zip', 'r') as zip_ref:
+                zip_ref.extractall('./Temp/')
+            subprocess.run(f'sc.exe create RTCore64 type= kernel start= auto binPath= "Temp/RTCore64.sys" DisplayName= "Micro - Star MSI Afterburner"')
+            subprocess.run("net start RTCore64")
+            subprocess.run(f"./PPLcontrol.exe set {os.getpid()} PPL WinTcb")
+
+func_dict = {"set_ppl": set_ppl,
+             "Run_As_Admin":Run_As_Admin.Run_As_Admin}
+
+
+
 
 loaded_mods = []
 loaded_mappings = {}
 loaded_modules = {}
+
 def load_mods(modlist_path='Modlist.json',mod_name="*",type="Normal"):
     with open(modlist_path, 'r') as f:
         modlist = json.load(f)
@@ -186,12 +220,21 @@ def UseMod(mod_name, func="", args=None, **kwargs):
     except Exception as e:
         lwjgl.error(f"Error calling '{target_func_name}' from mod '{mod_name}': {e}")
         return
-    
+
+Used_cmd = False
 def main():
     load_mods(type="AutoLoad")
+    global Used_cmd
     while True:
         rich.print("[bold blue]Wnclient> [/bold blue]", end="")
-        input_command = input("")
+        if not Used_cmd:
+            if cmd_args.command is not None:
+                input_command = cmd_args.command
+            else:
+                input_command = input("")
+            Used_cmd = True
+        else:
+            input_command = input("")
         if input_command.lower() in ['exit', 'quit']:
             isExiting = True
             sys.exit(0)
@@ -216,8 +259,13 @@ def main():
                     if mod_to_use in loaded_mods:
                         lwjgl.info(f"Using mod: {mod_to_use}")
                         UseMod(mod_to_use, mod_func, mod_parameters,**mod_kwargs)
+            elif input_command in func_dict:
+                func_dict[input_command]()
             else:
                 lwjgl.error(f"Unknown command: {input_command}")
+            
+
+            
 if __name__ == "__main__":
     isExiting = False
     while isExiting is False:
