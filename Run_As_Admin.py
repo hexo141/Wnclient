@@ -17,6 +17,7 @@ def Run_As_Admin(command=""):
             if res_code <= 32:
                 lwjgl.error(f"Failed to elevate power, return: {res_code}")
             else:
+                lwjgl.info("You have acquired administrator privileges, please use the new window")
                 exit()
     else:
         lwjgl.error("It can only run on Windows")

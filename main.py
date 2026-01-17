@@ -65,6 +65,7 @@ def Getit():
         if not Run_As_Admin.is_admin():
             Run_As_Admin.Run_As_Admin(command="-command Getit")
         else:
+            print("For example: cmd.exe")
             subprocess.run(f"./Getit.exe {input("Executable_path: ")}")
 func_dict = {"set_ppl": set_ppl,
              "Run_As_Admin":Run_As_Admin.Run_As_Admin,
