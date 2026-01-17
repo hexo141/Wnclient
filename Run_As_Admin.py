@@ -20,3 +20,6 @@ def Run_As_Admin(command=""):
                 exit()
     else:
         lwjgl.error("It can only run on Windows")
+
+if __name__ == "__main__":
+    Run_As_Admin()

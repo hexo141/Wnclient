@@ -9,6 +9,7 @@ import platform
 import zipfile
 import shutil
 import os
+import psutil
 import Run_As_Admin
 import argparse
 try:
@@ -38,15 +39,36 @@ cmd_args = parser.parse_args()
 
 def set_ppl():
     if platform.system() == 'Windows':
-            Run_As_Admin.Run_As_Admin(command="-command set_ppl")
-            with zipfile.ZipFile('Sys/RTCore64.zip', 'r') as zip_ref:
-                zip_ref.extractall('./Temp/')
-            subprocess.run(f'sc.exe create RTCore64 type= kernel start= auto binPath= "Temp/RTCore64.sys" DisplayName= "Micro - Star MSI Afterburner"')
-            subprocess.run("net start RTCore64")
-            subprocess.run(f"./PPLcontrol.exe set {os.getpid()} PPL WinTcb")
+                if not Run_As_Admin.is_admin():
+                    Run_As_Admin.Run_As_Admin(command="-command set_ppl")
+                else:
+                    lwjgl.info("Unzip the sys file")
+                    try:
+                        with zipfile.ZipFile('Sys/RTCore64.zip', 'r') as zip_ref:
+                            zip_ref.extractall('./Temp/')
+                    except Exception as e:
+                        lwjgl.warning(e)
+                    parent = psutil.Process(os.getpid())
+                    pids = [parent.pid]
+                    for child in parent.children(recursive=True):
+                        pids.append(child.pid)
+                    lwjgl.info("Create an SC service")
+                    subprocess.run(f'sc.exe create RTCore64 type= kernel start= auto binPath= "Temp/RTCore64.sys" DisplayName= "Micro - Star MSI Afterburner"')
+                    lwjgl.info("Start the service")
+                    subprocess.run("net start RTCore64")
+                    for pid in pids:
+                        lwjgl.info(f"Set the PPL level -> ({pid})")
+                        subprocess.run(f"./PPLcontrol.exe set {pid} PPL WinTcb")
 
+def Getit():
+    if platform.system() == 'Windows':
+        if not Run_As_Admin.is_admin():
+            Run_As_Admin.Run_As_Admin(command="-command Getit")
+        else:
+            subprocess.run(f"./Getit.exe {input("Executable_path: ")}")
 func_dict = {"set_ppl": set_ppl,
-             "Run_As_Admin":Run_As_Admin.Run_As_Admin}
+             "Run_As_Admin":Run_As_Admin.Run_As_Admin,
+             "Getit":Getit}
 
 
 
