@@ -68,3 +68,4 @@ python main.py
 1. https://github.com/wang-yupu/netease_mc_name_generator   
 2. https://github.com/RedCursorSecurityConsulting/PPLKiller
 3. https://github.com/itm4n/PPLcontrol
+4. https://www.bilibili.com/video/BV1nJCxBmEhf/
