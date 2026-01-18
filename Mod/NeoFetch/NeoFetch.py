@@ -359,7 +359,6 @@ def main(image_url_or_path=None):
     # Get terminal size for better layout
     terminal_size = console.size
     terminal_width = terminal_size.width
-    terminal_height = terminal_size.height
     
     # Calculate image width based on terminal size
     # Use about 1/3 of terminal width for image, maximum 40 characters
@@ -381,7 +380,6 @@ def main(image_url_or_path=None):
             console.print(line)
 
 if __name__ == "__main__":
-    import sys
     import argparse
     
     parser = argparse.ArgumentParser(description='Display system information with optional image')
