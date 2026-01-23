@@ -1,4 +1,5 @@
 {
     "Universal": {"func": "Universal"},
-    "UAC_Bypass": {"func": "UAC_Bypass"}
+    "UAC_Bypass": {"func": "UAC_Bypass"},
+    "GetSystem_by_Winlogon": {"func": "GetSystem_by_Winlogon"}
 }
