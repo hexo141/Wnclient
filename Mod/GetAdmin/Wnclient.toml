@@ -1,0 +1,7 @@
+Name = "GetAdmin"
+Version = "1.0.0"
+Description = "Get Admin in different ways"
+Author = "Wnclient Dev Team"
+Dependence = ["ctypes"]
+platforms = ["Windows"]
+UseThreads = false

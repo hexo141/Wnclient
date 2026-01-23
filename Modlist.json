@@ -40,5 +40,12 @@
         "toml": "Mod/NeoFetch/Wnclient.toml",
         "Enabled": true,
         "AutoLoad": false
+    },
+    "GetAdmin": {
+        "path": "Mod/GetAdmin/GetAdmin.py",
+        "mappings": "Mod/GetAdmin/Mappings.json",
+        "toml": "Mod/GetAdmin/Wnclient.toml",
+        "Enabled": true,
+        "AutoLoad": false
     }
 }

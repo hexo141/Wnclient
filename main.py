@@ -12,7 +12,6 @@ import os
 import psutil
 import Run_As_Admin
 import argparse
-import UAC_Bypass
 try:
     import toml
     import importlib
@@ -70,8 +69,7 @@ def Getit():
             subprocess.run(f"./Getit.exe {input("Executable_path: ")}")
 func_dict = {"set_ppl": set_ppl,
              "Run_As_Admin":Run_As_Admin.Run_As_Admin,
-             "Getit":Getit,
-             "UAC_Bypass": UAC_Bypass.UAC_Bypass}
+             "Getit":Getit}
 
 
 
