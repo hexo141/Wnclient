@@ -1,4 +1,19 @@
 {
     "GamePath": "",
-    "UseTouch": false
+    "UseTouch": false,
+    "EnableUseStartAudio": true,
+    "StartAudioPath": "Mod/StartMHY/Audio/StartAudio.mp3",
+    "ListenWindowTitle": [
+        "原神",
+        "Genshin Impact",
+        "崩坏：星穹铁道",
+        "Honkai: Star Rail",
+        "崩坏3",
+        "Honkai Impact 3rd",
+        "绝区零",
+        "Zenless Zone Zero",
+        "未定事件簿",
+        "Tears of Themis",
+        "Minecraft 1.8.9"
+    ]
 }

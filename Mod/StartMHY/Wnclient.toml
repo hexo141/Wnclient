@@ -2,6 +2,6 @@ Name = "StartMHY"
 Version = "1.0.0"
 Description = "Start Genshin Impact with custom settings"
 Author = "Wnclient Dev Team"
-Dependence = ["tk"]
+Dependence = ["pygame","tk"]
 platforms = ["Windows"]
 UseThreads = true
