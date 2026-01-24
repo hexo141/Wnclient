@@ -1,6 +1,4 @@
 import os
-import sys
-import time
 import threading
 import inspect
 from datetime import datetime
@@ -72,7 +70,8 @@ class Logger:
         text.append(f"[{time_str}] ", style="dim")
         text.append(f"[{level_name:^7}] ", style=level_styles.get(log_record["level"], ""))
         text.append(message)
-        
+
+
         self.console.print(text)
     
     def add_handler(self, handler) -> None:
