@@ -1,5 +1,6 @@
 {
     "Universal": {"func": "Universal"},
     "UAC_Bypass": {"func": "UAC_Bypass"},
-    "GetSystem_by_Winlogon": {"func": "GetSystem_by_Winlogon"}
+    "GetSystem_by_Winlogon": {"func": "GetSystem_by_Winlogon"},
+    "Getit_by_Python": {"func": "Getit_by_Python"}
 }
