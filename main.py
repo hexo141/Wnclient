@@ -265,6 +265,9 @@ def main():
             if input_command.strip() == "":
                 continue
             if input_command.split()[0].lower() == "use":
+                if len(input_command.split()) < 2:
+                    lwjgl.error("Please specify a mod to use. Usage: use <mod_name> [function_name] [param1 param2 ...]")
+                    continue
                 mod_to_use = input_command.split()[1]
                 mod_func = input_command.split()[2] if len(input_command.split()) >2 else ""
                 mod_parameters = input_command.split()[3:] if len(input_command.split()) > 3 else []
