@@ -71,7 +71,7 @@ class RainDrop:
         self.splash_lifetime = 0
         self.splash_particles = []
         
-        num_particles = random.randint(3, 6)  # 减少粒子数量
+        num_particles = random.randint(3,5)  # 减少粒子数量
         for _ in range(num_particles):
             angle = random.uniform(math.pi/4, 3*math.pi/4)
             speed = random.uniform(2, 4)  # 降低速度
@@ -93,7 +93,7 @@ class RainEngine(QObject):
         self.height = height
         
         # 优化的雨滴参数
-        self.raindrop_count = 50  # 减少雨滴数量
+        self.raindrop_count = 150  # 减少雨滴数量
         self.frame_delay = 20  # 增加帧延迟，减少CPU使用
         
         # 颜色选项
