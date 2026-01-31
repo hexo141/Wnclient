@@ -1,0 +1,15 @@
+{
+  "raindrops_count": 150,
+  "base_speed": 3.0,
+  "speed_variation": 1.5,
+  "drop_size": 3,
+  "color": [
+    100,
+    180,
+    255
+  ],
+  "check_windows": true,
+  "max_alpha": 220,
+  "min_alpha": 80,
+  "screen_padding": 10
+}
