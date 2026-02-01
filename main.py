@@ -5,6 +5,7 @@
 import sys
 import json
 import subprocess
+import wnc
 import platform
 import zipfile
 import shutil
@@ -69,7 +70,8 @@ def Getit():
             subprocess.run(f"./Getit.exe {input("Executable_path: ")}")
 func_dict = {"set_ppl": set_ppl,
              "Run_As_Admin":Run_As_Admin.Run_As_Admin,
-             "Getit":Getit}
+             "Getit":Getit,
+             "reload": wnc.reload_client}
 
 
 
@@ -244,9 +246,29 @@ def UseMod(mod_name, func="", args=None, **kwargs):
         lwjgl.error(f"Error calling '{target_func_name}' from mod '{mod_name}': {e}")
         return
 
+def load_auto_use():
+    try:
+        with open("AutoUse.json", "r") as f:
+            auto_use_data = json.load(f)
+        for mod_name, funcs in auto_use_data.items():
+            if mod_name not in loaded_mods:
+                load_mods(mod_name=mod_name)
+            for func, param in funcs.items():
+                if param is not None:
+                    if isinstance(param, dict):
+                        UseMod(mod_name, func, **param)
+                    elif isinstance(param, list):
+                        UseMod(mod_name, func, param)
+                    else:
+                        UseMod(mod_name, func, [param])
+    except Exception as e:
+        lwjgl.warning(f"Error in load_auto_use: {e}")
+
 Used_cmd = False
 def main():
+    load_auto_use()
     load_mods(type="AutoLoad")
+    
     global Used_cmd
     while True:
         rich.print("[bold blue]Wnclient> [/bold blue]", end="")

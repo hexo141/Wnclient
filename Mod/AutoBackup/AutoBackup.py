@@ -5,6 +5,7 @@ import json
 import psutil
 import time
 import os
+import wnc
 import lwjgl
 import threading
 
@@ -194,7 +195,7 @@ def toggle_auto_backup(enable: bool):
     if enable:
         with open(config_path, 'w') as f:
             json.dump({"enabled": True}, f)
-        
+        wnc.set_auto_use("AutoBackup", "toggle_auto_backup", {"enabled": True})
         # 查找可以存储备份的目录
         backup_dirs = []
         for partition in psutil.disk_partitions():
