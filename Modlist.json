@@ -47,5 +47,12 @@
         "toml": "Mod/GetAdmin/Wnclient.toml",
         "Enabled": true,
         "AutoLoad": false
+    },
+    "AutoBackup": {
+        "path": "Mod/AutoBackup/AutoBackup.py",
+        "mappings": "Mod/AutoBackup/Mappings.json",
+        "toml": "Mod/AutoBackup/Wnclient.toml",
+        "Enabled": true,
+        "AutoLoad": false
     }
 }
