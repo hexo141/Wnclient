@@ -1,0 +1,7 @@
+Name = "TimeHack"
+Version = "1.0.0"
+Description = "A time manipulation tool for Windows applications"
+Author = "Wnclient Dev Team"
+Dependence = ["pywin32"]
+platforms = ["Windows"]
+UseThreads = false

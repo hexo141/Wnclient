@@ -1,0 +1,3 @@
+{
+    "inject_by_window_title": {"func": "inject_by_window_title","Parameters": {"window_title":{"type":"str","isRequired":true},"time_scale":{"type":"float","isRequired":true}}}
+}

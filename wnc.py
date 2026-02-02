@@ -2,6 +2,7 @@ import json
 import tkinter as tk
 import lwjgl
 import os
+import subprocess
 import sys
 from tkinter import messagebox
 try:
@@ -59,4 +60,5 @@ def set_auto_use(mod_name, func , param):
 
 def reload_client():
     lwjgl.info("Reloading client...")
-    os.execl(sys.executable, sys.executable, *sys.argv)
+    subprocess.run(["python", "main.py"] + sys.argv[1:], shell=True, start_new_session=True)
+    sys.exit(0)

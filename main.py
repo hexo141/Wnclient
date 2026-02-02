@@ -24,13 +24,7 @@ except ImportError as e:
     setup.Setup()
     print("[Info] Required packages installed. Please re-run the program.")
     sys.exit(0)
-try:
-    if os.path.exists("./Temp"):
-        lwjgl.info("Del temp")
-        shutil.rmtree("./Temp/")
-    os.makedirs("./Temp")
-except Exception as e:
-    lwjgl.warning(f"Can not delete some file: {e}")
+
 
 parser = argparse.ArgumentParser(description='A specail client!')
 
@@ -315,6 +309,13 @@ def main():
 
             
 if __name__ == "__main__":
+    try:
+        if os.path.exists("./Temp"):
+            lwjgl.info("Del temp")
+            shutil.rmtree("./Temp/")
+        os.makedirs("./Temp")
+    except Exception as e:
+        lwjgl.warning(f"Can not delete some file: {e}")
     isExiting = False
     while isExiting is False:
         try:

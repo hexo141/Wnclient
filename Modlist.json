@@ -54,5 +54,12 @@
         "toml": "Mod/AutoBackup/Wnclient.toml",
         "Enabled": true,
         "AutoLoad": false
+    },
+    "TimeHack": {
+        "path": "Mod/TimeHack/TimeHack.py",
+        "mappings": "Mod/TimeHack/Mappings.json",
+        "toml": "Mod/TimeHack/Wnclient.toml",
+        "Enabled": true,
+        "AutoLoad": false
     }
 }

@@ -2,9 +2,7 @@ import ctypes
 import ctypes.wintypes
 import win32gui
 import win32process
-import keyboard
 import os
-import sys
 
 # Windows API types and constants
 PROCESS_ALL_ACCESS = 0x1F0FFF
@@ -220,49 +218,16 @@ class DLLInjector:
 
 # Functional API for direct use
 def inject_by_window_title(window_title, dll_path):
-    """Functional API: Inject DLL by window title"""
+    dll_path = os.path.abspath(dll_path)
     injector = DLLInjector()
     return injector.inject_dll_by_window_title(window_title, dll_path)
 
 def inject_by_window_class(class_name, dll_path):
-    """Functional API: Inject DLL by window class"""
+    dll_path = os.path.abspath(dll_path)
     injector = DLLInjector()
     return injector.inject_dll_by_window_class(class_name, dll_path)
 
 def inject_by_process_id(process_id, dll_path):
-    """Functional API: Inject DLL by process ID"""
+    dll_path = os.path.abspath(dll_path)
     injector = DLLInjector()
     return injector.inject_dll_by_process_id(process_id, dll_path)
-
-# Main execution
-if __name__ == "__main__":
-    import argparse
-    
-    parser = argparse.ArgumentParser(description='DLL Injection Tool')
-    parser.add_argument('dll_path', help='Path to DLL file')
-    parser.add_argument('-t', '--title', help='Window title to target')
-    parser.add_argument('-c', '--class', dest='class_name', help='Window class to target')
-    parser.add_argument('-p', '--pid', type=int, help='Process ID to target')
-    
-    args = parser.parse_args()
-    
-    # Validate DLL path
-    if not os.path.exists(args.dll_path):
-        print(f"Error: DLL file not found: {args.dll_path}")
-        sys.exit(1)
-    
-    # Run in appropriate mode
-    if args.title:
-        success = inject_by_window_title(args.title, args.dll_path)
-        sys.exit(0 if success else 1)
-    elif args.class_name:
-        success = inject_by_window_class(args.class_name, args.dll_path)
-        sys.exit(0 if success else 1)
-    elif args.pid:
-        success = inject_by_process_id(args.pid, args.dll_path)
-        sys.exit(0 if success else 1)
-    else:
-        print("No target specified. Use --help for options.")
-        print("\nQuick usage examples:")
-        print("  python dll_injector.py mydll.dll --title \"Target Window\"")
-        print("  python dll_injector.py mydll.dll --pid 1234")
