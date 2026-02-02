@@ -61,5 +61,12 @@
         "toml": "Mod/TimeHack/Wnclient.toml",
         "Enabled": true,
         "AutoLoad": false
+    },
+    "Acrylic": {
+        "path": "Mod/Acrylic/Acrylic.py",
+        "mappings": "Mod/Acrylic/Mappings.json",
+        "toml": "Mod/Acrylic/Wnclient.toml",
+        "Enabled": true,
+        "AutoLoad": false
     }
 }
