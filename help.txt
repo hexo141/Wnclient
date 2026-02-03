@@ -1,0 +1,16 @@
+帮助:
+    1.use:
+    使用一个mod
+    用法
+        use <mod_name> <func> <para> <para1> ...
+        use <mod_name> 
+    2.set_ppl:
+        将当前进程设置为ppl等级
+    3.Getit:
+        用TrustedInstaller权限打开置顶应用
+    4.Run_As_Admin：
+        使用Administrator重启客户端
+    5.reload:
+        重载客户端
+    6.modlist:
+        查看所有Mod的信息

@@ -1,7 +1,10 @@
 #  /\_/\
 # ( o.o )
 #  > ^ <
-
+#
+# /\_/\
+# ( -.-)
+# / >📄
 import sys
 import json
 import subprocess
@@ -65,7 +68,8 @@ def Getit():
 func_dict = {"set_ppl": set_ppl,
              "Run_As_Admin":Run_As_Admin.Run_As_Admin,
              "Getit":Getit,
-             "reload": wnc.reload_client}
+             "reload": wnc.reload_client,
+             "modlist": wnc.modlist}
 
 
 
@@ -236,6 +240,24 @@ def UseMod(mod_name, func="", args=None, **kwargs):
     # call
     try:
         return func_callable(*final_args, **final_kwargs)
+    except ImportError as ie:
+        with open("Modlist.json", 'r') as f:
+            modlist = json.load(f)
+        toml_path = modlist[mod_name]['toml']
+        dependencies = toml.load(open(toml_path)).get('Dependence', [])
+        for dep in dependencies:
+            lwjgl.warning(ie)
+            lwjgl.info(f"Installing dependency: {dep}")
+            try:
+                import setup # 安装依赖库
+                setup.Setup()
+
+                subprocess.run(['uv','pip', 'install', dep,'--python',sys.executable], check=True)
+                lwjgl.info(f"Dependency {dep} installed successfully.")
+            except subprocess.CalledProcessError as ce:
+                lwjgl.error(f"Failed to install dependency {dep}: {ce}")
+            else:
+                wnc.reload_client(para="-c",para1=f"use {mod_name} {func} " + ' '.join([str(arg) for arg in args]) + ' ' + ' '.join([f"{k}={v}" for k,v in kwargs.items()]))
     except Exception as e:
         lwjgl.error(f"Error calling '{target_func_name}' from mod '{mod_name}': {e}")
         return

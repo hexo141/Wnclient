@@ -2,6 +2,6 @@ Name = "Arcrylic"
 Version = "1.0.0"
 Description = "A module to apply acrylic blur effect to Windows application windows"
 Author = "Wnclient Dev Team"
-Dependence = ["ctypes"]
+Dependence = ["ctypes","pywin32"]
 platforms = ["Windows"]
 UseThreads = false

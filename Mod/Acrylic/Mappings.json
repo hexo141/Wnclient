@@ -1,3 +1,3 @@
 {
-    "apply_acrylic_to_window": {"func": "apply_acrylic_to_window","Parameters": {"window_title":{"type":"str","isRequired":true}}}
+    "apply_acrylic_to_window": {"func": "apply_acrylic_to_window","Parameters": {"window_title":{"type":"str","isRequired":false}}}
 }

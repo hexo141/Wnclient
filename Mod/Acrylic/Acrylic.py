@@ -105,7 +105,11 @@ def is_windows11_or_later():
     except:
         return False
 
-def apply_acrylic_to_window(window_title):
+def apply_acrylic_to_window(window_title=""):
+    if window_title.strip() == "":
+        import win32gui
+        hwnd = win32gui.GetForegroundWindow()
+        window_title = win32gui.GetWindowText(hwnd)
     print(f"Searching for windows with title containing '{window_title}'...")
     
     # Find matching windows
