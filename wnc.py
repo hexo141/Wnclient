@@ -87,7 +87,7 @@ def modlist():
         except ValueError:
             print("Invalid input. Please enter a valid page number or 'q' to quit.")
             continue
-        items_per_page = 10
+        items_per_page = 3
         total_mods = len(modlist_data)
         total_pages = (total_mods + items_per_page - 1) // items_per_page
         
@@ -119,9 +119,6 @@ def modlist():
             
             if i < end_index - 1:
                 rich.print()
-        
-        if total_pages > 1:
-            rich.print(f"\n[dim]Call modlist(page=X) to view other pages[/dim]")
 
 def help():
     num = 0
