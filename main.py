@@ -65,11 +65,15 @@ def Getit():
         else:
             print("For example: cmd.exe")
             subprocess.run(f"./Getit.exe {input("Executable_path: ")}")
+
+
 func_dict = {"set_ppl": set_ppl,
              "Run_As_Admin":Run_As_Admin.Run_As_Admin,
              "Getit":Getit,
              "reload": wnc.reload_client,
-             "modlist": wnc.modlist}
+             "modlist": wnc.modlist,
+             "help": wnc.help
+            }
 
 
 

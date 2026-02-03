@@ -1,0 +1,16 @@
+Help:
+    1.use:
+    Use a mod
+    Usage
+        use <mod_name> <func> <para> <para1> ...
+        use <mod_name> 
+    2.set_ppl:
+        Set the current process to ppl level
+    3. Getit:
+        Open pinned applications with TrustedInstaller privileges
+    4. Run_As_Admin:
+        Restart the client using Administrator privileges
+    5. reload:
+        Reload the client
+    6. modlist:
+        View information for all Mods

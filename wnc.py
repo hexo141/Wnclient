@@ -3,6 +3,7 @@ import tkinter as tk
 import lwjgl
 import rich
 import toml
+import os
 import subprocess
 import sys
 from tkinter import messagebox
@@ -121,3 +122,25 @@ def modlist():
         
         if total_pages > 1:
             rich.print(f"\n[dim]Call modlist(page=X) to view other pages[/dim]")
+
+def help():
+    num = 0
+    for file in os.listdir("Help"):
+        num += 1
+        rich.print(f"[bold green]{num}. {file}[/bold green]")
+    while True:
+        num_input = input("Enter the number of the help file you want to read (or 'q' to quit): ")
+        if num_input.lower() == 'q':
+            return
+        try:
+            num_input = int(num_input)
+            if num_input < 1 or num_input > num:
+                rich.print("[red]Invalid number. Please try again.[/red]")
+                continue
+            selected_file = os.listdir("Help")[num_input - 1]
+            with open(os.path.join("Help", selected_file), "r", encoding="utf-8") as f:
+                content = f.read()
+                rich.print(f"[bold cyan]{selected_file}[/bold cyan]\n")
+                rich.print(content)
+        except ValueError:
+            rich.print("[red]Invalid input. Please enter a valid number or 'q' to quit.[/red]")
