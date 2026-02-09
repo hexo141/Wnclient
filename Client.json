@@ -1,3 +1,5 @@
 {
-    "ignorecase": true
+    "ignorecase": false,
+    "custom_boot_txt": true,
+    "boot_txt_path": "Boot.txt"
 }

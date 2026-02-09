@@ -19,7 +19,7 @@ except Exception as e:
 def set_auto_use(mod_name, func , param=""):
     root = tk.Tk()
     root.withdraw()  # 隐藏主窗口
-    with open("set_auto_use.json", "r") as f:
+    with open("no_cancel", "r") as f:
         set_auto_use_data = json.loads(f.read())
         if "nocancel" in set_auto_use_data:
             if set_auto_use_data["nocancel"].get(mod_name, 0) == -1:
@@ -40,7 +40,7 @@ def set_auto_use(mod_name, func , param=""):
             return True
     else:
         try:
-            with open("set_auto_use.json", "r") as f:
+            with open("no_cancel", "r") as f:
                 set_auto_use_data = json.loads(f.read())
                 if "nocancel" not in set_auto_use_data:
                     set_auto_use_data["nocancel"] = {}
@@ -49,14 +49,14 @@ def set_auto_use(mod_name, func , param=""):
                     if set_auto_use_data["nocancel"].get(mod_name, 0) >=3:
                         if messagebox.askyesno("Confirm", f"You have previously denied {mod_name} three times. Do you want to permanently deny it setting auto use for {func}?"):
                             set_auto_use_data["nocancel"][mod_name] = -1
-                            with open("set_auto_use.json", "w") as f:
+                            with open("no_cancel", "w") as f:
                                 json.dump(set_auto_use_data, f, indent=4)
                             return False
                         else:
                             set_auto_use_data["nocancel"][mod_name] = 0
                             return False
                     set_auto_use_data["nocancel"][mod_name] = set_auto_use_data["nocancel"].get(mod_name, 0) + 1
-            with open("set_auto_use.json", "w") as f:
+            with open("no_cancel", "w") as f:
                 json.dump(set_auto_use_data, f, indent=4)
         except Exception as e:
             lwjgl.error(f"Failed to record no-cancel decision: {e}")
