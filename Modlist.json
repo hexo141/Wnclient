@@ -62,10 +62,10 @@
         "Enabled": true,
         "AutoLoad": false
     },
-    "Acrylic": {
-        "path": "Mod/Acrylic/Acrylic.py",
-        "mappings": "Mod/Acrylic/Mappings.json",
-        "toml": "Mod/Acrylic/Wnclient.toml",
+    "WindowStyle": {
+        "path": "Mod/WindowStyle/WindowStyle.py",
+        "mappings": "Mod/WindowStyle/Mappings.json",
+        "toml": "Mod/WindowStyle/Wnclient.toml",
         "Enabled": true,
         "AutoLoad": false
     }

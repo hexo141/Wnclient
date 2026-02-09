@@ -30,11 +30,9 @@ pSetWindowCompositionAttribute = ctypes.WINFUNCTYPE(
 
 def enable_acrylic_win10(hwnd):
     try:
-        # Get SetWindowCompositionAttribute function
         user32 = ctypes.WinDLL("user32.dll")
         func = getattr(user32, "SetWindowCompositionAttribute", None)
         if not func:
-            # Get function address manually
             func_ptr = windll.kernel32.GetProcAddress(
                 windll.kernel32.GetModuleHandleW("user32.dll"),
                 "SetWindowCompositionAttribute"
@@ -43,11 +41,10 @@ def enable_acrylic_win10(hwnd):
                 return False
             func = pSetWindowCompositionAttribute(func_ptr)
         
-        # Set acrylic effect
         accent = ACCENTPOLICY()
         accent.nAccentState = ACCENT_ENABLE_ACRYLICBLURBEHIND
         accent.nFlags = 2
-        accent.nColor = 0x00FFFFFF  # Semi-transparent white
+        accent.nColor = 0x00FFFFFF  # 白色
         accent.nAnimationId = 0
         
         data = WINCOMPATTRDATA()
@@ -105,11 +102,7 @@ def is_windows11_or_later():
     except:
         return False
 
-def apply_acrylic_to_window(window_title=""):
-    if window_title.strip() == "":
-        import win32gui
-        hwnd = win32gui.GetForegroundWindow()
-        window_title = win32gui.GetWindowText(hwnd)
+def apply_acrylic_to_window(window_title=""):     
     print(f"Searching for windows with title containing '{window_title}'...")
     
     # Find matching windows
@@ -146,3 +139,28 @@ def apply_acrylic_to_window(window_title=""):
     
     print(f"\nSuccessfully applied acrylic effect to {success_count}/{len(windows)} window(s)")
     return success_count > 0
+
+def AutoLoad():
+    import json
+    ws_config = json.load(open("Mod/WindowStyle/Config.json", 'r'))
+    if ws_config.get("EnableAcrylic", False):
+        import win32gui
+        hwnd = win32gui.GetForegroundWindow()
+        window_title = win32gui.GetWindowText(hwnd)
+        apply_acrylic_to_window(window_title)
+
+def InteractionMode():
+    import rich
+    while True:
+        rich.print("[bold blue]Wnclient> [/bold blue][bold yellow]WindowStyle> [/bold yellow]", end="")
+        input_command = input().strip()
+        if input_command.lower() in ["exit", "quit"]:
+            break
+        elif input_command.lower() == "setautostart":
+            import wnc
+            wnc.set_auto_use("WindowStyle", "AutoLoad")
+        elif input_command.lower() == "acrylic":
+            import win32gui
+            hwnd = win32gui.GetForegroundWindow()
+            window_title = win32gui.GetWindowText(hwnd)
+            apply_acrylic_to_window(window_title)

@@ -16,7 +16,7 @@ except Exception as e:
 
 
 
-def set_auto_use(mod_name, func , param):
+def set_auto_use(mod_name, func , param=""):
     root = tk.Tk()
     root.withdraw()  # 隐藏主窗口
     with open("set_auto_use.json", "r") as f:

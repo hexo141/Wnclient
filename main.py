@@ -1,4 +1,4 @@
-#  /\_/\
+# /\_/\
 # ( o.o )
 #  > ^ <
 #
@@ -85,13 +85,22 @@ loaded_modules = {}
 def load_mods(modlist_path='Modlist.json',mod_name="*",type="Normal"):
     with open(modlist_path, 'r') as f:
         modlist = json.load(f)
+    
+    # 创建忽略大小写的mod名称映射
+    modlist_lower = {k.lower(): k for k in modlist.keys()}
+    
     if mod_name == "*":
         mods_to_load = modlist.keys()
     else:
-        mods_to_load = [mod_name] if mod_name in modlist else []
-        if mod_name not in modlist:
+        # 使用小写查找
+        mod_name_lower = mod_name.lower()
+        if mod_name_lower in modlist_lower:
+            original_name = modlist_lower[mod_name_lower]
+            mods_to_load = [original_name]
+        else:
             lwjgl.error(f"Mod {mod_name} not found in modlist.")
             return
+    
     for mod_name in mods_to_load:
         mod_path = modlist[mod_name]['path']
         mod_mappings_path = modlist[mod_name]['mappings']
@@ -153,6 +162,21 @@ def _convert_type(value, to_type):
 def UseMod(mod_name, func="", args=None, **kwargs):
     # avoid mutable default
     args = args or []
+    
+    # 创建忽略大小写的已加载mod映射
+    loaded_mods_lower = {m.lower(): m for m in loaded_mods}
+    
+    # 查找正确的mod名称（忽略大小写）
+    mod_name_lower = mod_name.lower()
+    if mod_name_lower in loaded_mods_lower:
+        correct_mod_name = loaded_mods_lower[mod_name_lower]
+    else:
+        lwjgl.error(f"Mod {mod_name} is not loaded or does not exist.")
+        return
+    
+    # 使用正确的mod名称
+    mod_name = correct_mod_name
+    
     # load mappings file for this mod
     with open(loaded_mappings[mod_name], 'r') as f:
         mod_mappings = json.load(f)
@@ -274,13 +298,18 @@ def load_auto_use():
             if mod_name not in loaded_mods:
                 load_mods(mod_name=mod_name)
             for func, param in funcs.items():
-                if param is not None:
+                if param is not None and param != "":
+                    # 参数不为空且不是空字符串
                     if isinstance(param, dict):
                         UseMod(mod_name, func, **param)
                     elif isinstance(param, list):
                         UseMod(mod_name, func, param)
                     else:
                         UseMod(mod_name, func, [param])
+                else:
+                    # 参数为空或空字符串，不传递参数
+                    UseMod(mod_name, func)
+                    
     except Exception as e:
         lwjgl.warning(f"Error in load_auto_use: {e}")
 
@@ -288,7 +317,7 @@ Used_cmd = False
 def main():
     load_auto_use()
     load_mods(type="AutoLoad")
-    
+    enable_ignorecase = Client_config.get("ignorecase", False)
     global Used_cmd
     while True:
         rich.print("[bold blue]Wnclient> [/bold blue]", end="")
@@ -296,7 +325,10 @@ def main():
             if cmd_args.command is not None:
                 input_command = cmd_args.command
             else:
-                input_command = input("")
+                if enable_ignorecase:
+                    input_command = input("").lower()
+                else:
+                    input_command = input("")
             Used_cmd = True
         else:
             input_command = input("")
@@ -318,23 +350,38 @@ def main():
                     if '=' in mod_param:
                         key, value = mod_param.split('=', 1)
                         mod_kwargs[key] = value
-                if mod_to_use in loaded_mods:
+                
+                # 创建忽略大小写的已加载mod映射
+                loaded_mods_lower = {m.lower(): m for m in loaded_mods}
+                
+                # 查找mod（忽略大小写）
+                mod_to_use_lower = mod_to_use.lower()
+                if mod_to_use_lower in loaded_mods_lower:
+                    # 找到已加载的mod（忽略大小写）
+                    mod_to_use = loaded_mods_lower[mod_to_use_lower]
                     lwjgl.info(f"Using mod: {mod_to_use}")
                     UseMod(mod_to_use, mod_func, mod_parameters,**mod_kwargs)
                 else:
                     lwjgl.warning(f"Mod {mod_to_use} is not loaded or does not exist.Please wait for loading.")
                     load_mods(mod_name=mod_to_use)
-                    if mod_to_use in loaded_mods:
+                    
+                    # 重新检查是否加载成功（忽略大小写）
+                    loaded_mods_lower = {m.lower(): m for m in loaded_mods}
+                    if mod_to_use_lower in loaded_mods_lower:
+                        mod_to_use = loaded_mods_lower[mod_to_use_lower]
                         lwjgl.info(f"Using mod: {mod_to_use}")
                         UseMod(mod_to_use, mod_func, mod_parameters,**mod_kwargs)
+                    else:
+                        lwjgl.error(f"Mod {mod_to_use} not found or failed to load.")
             elif input_command in func_dict:
                 func_dict[input_command]()
             else:
                 lwjgl.error(f"Unknown command: {input_command}")
             
-
-            
 if __name__ == "__main__":
+    lwjgl.info(f"Loading Configuration")
+    global Client_config
+    Client_config = json.load(open("Client.json", 'r'))
     try:
         if os.path.exists("./Temp"):
             lwjgl.info("Del temp")
