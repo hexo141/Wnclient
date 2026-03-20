@@ -26,12 +26,12 @@ def set_auto_use(mod_name, func , param=""):
                 return False
     if messagebox.askyesno("Select", f"{mod_name} wants to set auto use for {func} with parameters {param}. Do you allow this?"):
         try:
-            with open("AutoUse.json", "r") as f:
+            with open("AutoStart.json", "r") as f:
                 auto_use_data = json.loads(f.read())
                 if mod_name not in auto_use_data:
                     auto_use_data[mod_name] = {}
                 auto_use_data[mod_name][func] = param
-            with open("AutoUse.json", "w") as f:
+            with open("AutoStart.json", "w") as f:
                 json.dump(auto_use_data, f, indent=4)
         except Exception as e:
             lwjgl.error(f"Failed to set auto use: {e}")

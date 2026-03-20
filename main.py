@@ -310,7 +310,7 @@ def UseMod(mod_name, func="", args=None, **kwargs):
 
 def load_auto_use():
     try:
-        with open("AutoUse.json", "r") as f:
+        with open("AutoStart.json", "r") as f:
             auto_use_data = json.load(f)
         for mod_name, funcs in auto_use_data.items():
             if mod_name not in loaded_mods:
