@@ -1,56 +1,196 @@
-
-.Title {
-    font-size: 24px;
-    color: #24292e;
-    text-shadow: 10px 5px 6px grey;
+:root {
+    --bg-color: #ffffff;
+    --body-bg: #f9fafb;
+    --text-primary: #111827;
+    --text-secondary: #6b7280;
+    --border-color: #e5e7eb;
+    --accent-color: #111827;
+    --accent-hover: #374151;
+    --code-bg: #f3f4f6;
+    --success-color: #059669;
+    --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-mono: "SF Mono", "Fira Code", "Roboto Mono", monospace;
 }
-/* 代码块容器样式 */
-.code-block {
-    
-    background-color: #f6f8fa;
-    border: 1px solid #e1e4e8;
-    border-radius: 6px; /* 圆角 */
-    padding: 12px 16px;
-    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; /* 等宽字体 */
-    font-size: 14px;
-    color: #24292e; /* 深灰色文字 */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-main);
+    background-color: var(--body-bg);
+    color: var(--text-primary);
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
-    width: fit-content;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05); /* 轻微阴影增加立体感 */
+    min-height: 100vh;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
 }
 
-/* 代码文本部分 */
-.code-text {
-    margin-right: 16px;
-    white-space: nowrap; /* 防止换行 */
-    overflow-x: auto; /* 如果太长允许滚动 */
+.container {
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 32px;
+    width: 100%;
+    max-width: 640px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-/* 复制按钮样式 */
-.copy-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 4px;
-    border-radius: 4px;
+.header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.logo {
+    color: var(--accent-color);
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background-color 0.2s;
+}
+
+.title {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    letter-spacing: -0.025em;
+}
+
+.subtitle {
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-weight: 400;
+}
+
+.status-bar {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    background: var(--body-bg);
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 20px;
+}
+
+.status-dot {
+    width: 6px;
+    height: 6px;
+    background-color: var(--accent-color);
+    border-radius: 50%;
+}
+
+.code-block {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--code-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 16px;
+    gap: 16px;
+    transition: border-color 0.2s;
+}
+
+.code-block:hover {
+    border-color: var(--accent-color);
+}
+
+.code-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    overflow: hidden;
+    flex: 1;
+}
+
+.prompt {
+    color: var(--text-secondary);
+    font-weight: 600;
+    user-select: none;
+}
+
+.code-text {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none; /* Firefox */
+}
+
+.code-text::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+}
+
+.copy-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
 }
 
 .copy-btn:hover {
-    background-color: #e1e4e8; /* 鼠标悬停背景变深 */
+    background: var(--bg-color);
+    border-color: var(--accent-color);
 }
 
-.copy-btn svg {
-    width: 16px;
-    height: 16px;
-    fill: #586069; /* 图标颜色 */
+.copy-btn:active {
+    transform: scale(0.98);
 }
 
-.copy-btn:hover svg {
-    fill: #24292e;
-        }
+.copy-btn.copied {
+    border-color: var(--success-color);
+    color: var(--success-color);
+}
+
+.copy-btn .icon-check {
+    display: none;
+}
+
+.copy-btn.copied .icon-copy {
+    display: none;
+}
+
+.copy-btn.copied .icon-check {
+    display: block;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .code-block {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .copy-btn {
+        justify-content: center;
+        width: 100%;
+    }
+    
+    .code-text {
+        white-space: normal;
+        word-break: break-all;
+    }
+}
