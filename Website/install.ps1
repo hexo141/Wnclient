@@ -1,201 +1,152 @@
-# PowerShell installation script for Wnclient project
-# This script automatically downloads client files, configures Python and installs dependencies
-# Note: Does not use winget - manual Python installation required if not present
+<#
+.SYNOPSIS
+    Downloads, extracts, and sets up the Wnclient project, ensuring Python is installed.
 
-Write-Host "Starting installation for Wnclient project..." -ForegroundColor Green
+.DESCRIPTION
+    This script performs the following steps:
+    1. Downloads the repository ZIP from GitHub.
+    2. Extracts the ZIP to the current directory.
+    3. Checks if Python is installed; if not, installs it using winget (or a fallback download).
+    4. Changes to the extracted project folder.
+    5. Runs python setup.py.
 
-# Function to download file
-function Download-File {
-    param(
-        [string]$Url,
-        [string]$OutputPath
-    )
-    try {
-        [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
-        $webClient = New-Object System.Net.WebClient
-        $webClient.DownloadFile($Url, $OutputPath)
-        return $true
-    } catch {
-        Write-Host "Download failed: $_" -ForegroundColor Red
-        return $false
-    }
+.NOTES
+    Run this script with administrative privileges if Python installation is required.
+    The script uses winget for Python installation on Windows 10/11; if winget is not available, it falls back to downloading the official Python installer.
+#>
+
+# Stop on errors
+$ErrorActionPreference = "Stop"
+
+# Variables
+$zipUrl = "https://github.com/hexo141/Wnclient/archive/refs/heads/main.zip"
+$zipFile = "$env:TEMP\Wnclient-main.zip"
+$extractPath = ".\"   # Extract to current directory
+$projectFolder = "Wnclient-main"   # Expected folder name after extraction
+
+# Function to write colored output
+function Write-Info {
+    param([string]$Message)
+    Write-Host "[INFO] $Message" -ForegroundColor Cyan
 }
 
-# Function to extract zip
-function Expand-ZipFile {
-    param(
-        [string]$ZipPath,
-        [string]$Destination
-    )
-    try {
-        Expand-Archive -Path $ZipPath -DestinationPath $Destination -Force
-        return $true
-    } catch {
-        Write-Host "Extraction failed: $_" -ForegroundColor Red
-        return $false
-    }
+function Write-Success {
+    param([string]$Message)
+    Write-Host "[SUCCESS] $Message" -ForegroundColor Green
 }
 
-# Download client files from GitHub
-Write-Host "`nDownloading Wnclient files from GitHub..." -ForegroundColor Cyan
-$REPO_URL = "https://github.com/hexo141/Wnclient/archive/refs/heads/main.zip"
-$DOWNLOAD_DIR = "$env:TEMP\wnclient_download"
-$ZIP_FILE = "$DOWNLOAD_DIR\main.zip"
-
-# Create temporary directory
-if (Test-Path $DOWNLOAD_DIR) {
-    Remove-Item -Recurse -Force $DOWNLOAD_DIR
+function Write-ErrorMsg {
+    param([string]$Message)
+    Write-Host "[ERROR] $Message" -ForegroundColor Red
 }
-New-Item -ItemType Directory -Path $DOWNLOAD_DIR -Force | Out-Null
 
-# Download the zip file
-if (Download-File -Url $REPO_URL -OutputPath $ZIP_FILE) {
-    Write-Host "✓ Download completed successfully." -ForegroundColor Green
-} else {
-    Write-Host "✗ Failed to download from $REPO_URL" -ForegroundColor Red
+# Step 1: Download the ZIP file
+Write-Info "Downloading repository from $zipUrl ..."
+try {
+    Invoke-WebRequest -Uri $zipUrl -OutFile $zipFile -UseBasicParsing
+    Write-Success "Download completed: $zipFile"
+}
+catch {
+    Write-ErrorMsg "Failed to download the ZIP file. $_"
     exit 1
 }
 
-# Extract the zip file
-Write-Host "Extracting files..." -ForegroundColor Cyan
-if (Expand-ZipFile -ZipPath $ZIP_FILE -Destination $DOWNLOAD_DIR) {
-    Write-Host "✓ Extraction completed successfully." -ForegroundColor Green
-} else {
-    Write-Host "✗ Failed to extract files." -ForegroundColor Red
+# Step 2: Extract the ZIP
+Write-Info "Extracting $zipFile to $extractPath ..."
+try {
+    Expand-Archive -Path $zipFile -DestinationPath $extractPath -Force
+    Write-Success "Extraction completed."
+}
+catch {
+    Write-ErrorMsg "Failed to extract the ZIP file. $_"
     exit 1
 }
 
-# Find the extracted directory (will be named Wnclient-main)
-$EXTRACTED_DIR = Get-ChildItem -Path $DOWNLOAD_DIR -Directory | Where-Object { $_.Name -eq "Wnclient-main" } | Select-Object -First 1
+# Step 3: Check if Python is installed
+Write-Info "Checking for Python installation..."
+$pythonCmd = Get-Command python -ErrorAction SilentlyContinue
+if (-not $pythonCmd) {
+    Write-Info "Python not found. Installing Python..."
 
-if (-not $EXTRACTED_DIR) {
-    Write-Host "✗ Failed to find extracted files." -ForegroundColor Red
-    exit 1
-}
-
-# Copy files to current directory (or specified target)
-$TARGET_DIR = if ($args.Count -gt 0) { $args[0] } else { "." }
-Write-Host "Copying files to $TARGET_DIR..." -ForegroundColor Cyan
-
-# Get absolute path
-$TARGET_DIR = Resolve-Path $TARGET_DIR -ErrorAction SilentlyContinue
-if (-not $TARGET_DIR) {
-    New-Item -ItemType Directory -Path $TARGET_DIR -Force | Out-Null
-    $TARGET_DIR = Resolve-Path $TARGET_DIR
-}
-
-# Copy all files
-Copy-Item -Path "$($EXTRACTED_DIR.FullName)\*" -Destination $TARGET_DIR -Recurse -Force
-
-# Clean up
-Remove-Item -Recurse -Force $DOWNLOAD_DIR
-Write-Host "✓ Files copied successfully." -ForegroundColor Green
-
-# Check if Python is installed
-function Test-PythonInstalled {
-    try {
-        $pythonVersion = python --version 2>&1
-        $pythonPath = (Get-Command python -ErrorAction SilentlyContinue).Source
-        Write-Host "✓ Python detected: $pythonVersion" -ForegroundColor Yellow
-        Write-Host "  Path: $pythonPath" -ForegroundColor Gray
-        return $true
-    } catch {
-        return $false
-    }
-}
-
-# Check if Python is installed (version 3.8+)
-if (-not (Test-PythonInstalled)) {
-    Write-Host "`n⚠ Python is not installed or not in PATH." -ForegroundColor Red
-    Write-Host ""
-    Write-Host "Please install Python 3.8 or higher:" -ForegroundColor Cyan
-    Write-Host "  1. Download from: https://www.python.org/downloads/" -ForegroundColor White
-    Write-Host "  2. During installation, CHECK 'Add Python to PATH'" -ForegroundColor White
-    Write-Host "  3. After installation, restart this script" -ForegroundColor White
-    Write-Host ""
-    
-    # Optional: Offer Chocolatey installation (if user has choco)
-    $useChoco = Read-Host "Do you have Chocolatey installed and want to use it? (y/N)"
-    if ($useChoco -eq 'y' -or $useChoco -eq 'Y') {
+    # Try winget (available on Windows 10/11)
+    $winget = Get-Command winget -ErrorAction SilentlyContinue
+    if ($winget) {
+        Write-Info "Using winget to install Python..."
         try {
-            [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
-            Write-Host "Installing Python via Chocolatey..." -ForegroundColor Yellow
-            choco install python311 -y --install-arguments '/AddToPath=1'
-            # Refresh PATH in current session
-            $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
-            if (Test-PythonInstalled) {
-                Write-Host "✓ Python installed via Chocolatey successfully." -ForegroundColor Green
-            } else {
-                Write-Host "⚠ Python installed but not detected. Please restart your terminal and run this script again." -ForegroundColor Yellow
-                exit 1
-            }
-        } catch {
-            Write-Host "✗ Chocolatey installation failed. Please install Python manually." -ForegroundColor Red
-            exit 1
+            winget install Python.Python --silent --accept-package-agreements --accept-source-agreements
+            Write-Success "Python installed via winget."
         }
-    } else {
-        Write-Host "Waiting for manual Python installation..." -ForegroundColor Yellow
-        Write-Host "Press Enter after installing Python, or Ctrl+C to cancel."
-        $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-        
-        # Re-check Python
-        if (-not (Test-PythonInstalled)) {
-            Write-Host "✗ Python still not detected. Installation aborted." -ForegroundColor Red
-            exit 1
+        catch {
+            Write-ErrorMsg "winget installation failed. Trying fallback method."
+            $fallback = $true
         }
     }
-}
+    else {
+        Write-Info "winget not found. Using fallback installation method."
+        $fallback = $true
+    }
 
-# Verify Python version (3.8+)
-$pythonVersionOutput = python --version 2>&1
-if ($pythonVersionOutput -match "Python (\d+)\.(\d+)") {
-    $major = [int]$matches[1]
-    $minor = [int]$matches[2]
-    if ($major -lt 3 -or ($major -eq 3 -and $minor -lt 8)) {
-        Write-Host "✗ Python $major.$minor detected. Please install Python 3.8 or higher." -ForegroundColor Red
+    if ($fallback) {
+        # Fallback: download Python installer from official site
+        Write-Info "Downloading Python installer from python.org..."
+        $pythonInstallerUrl = "https://www.python.org/ftp/python/3.12.3/python-3.12.3-amd64.exe"   # Adjust version as needed
+        $installerPath = "$env:TEMP\python-installer.exe"
+        try {
+            Invoke-WebRequest -Uri $pythonInstallerUrl -OutFile $installerPath -UseBasicParsing
+        }
+        catch {
+            Write-ErrorMsg "Failed to download Python installer. $_"
+            exit 1
+        }
+
+        Write-Info "Installing Python silently..."
+        try {
+            Start-Process -FilePath $installerPath -ArgumentList "/quiet InstallAllUsers=1 PrependPath=1" -Wait -NoNewWindow
+            Write-Success "Python installation completed via installer."
+        }
+        catch {
+            Write-ErrorMsg "Python installation failed. $_"
+            exit 1
+        }
+        finally {
+            Remove-Item $installerPath -ErrorAction SilentlyContinue
+        }
+    }
+
+    # Refresh PATH environment variable in current session
+    $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+    # Verify again
+    $pythonCmd = Get-Command python -ErrorAction SilentlyContinue
+    if (-not $pythonCmd) {
+        Write-ErrorMsg "Python still not found after installation. Please check manually."
         exit 1
     }
-    Write-Host "✓ Python version $major.$minor is compatible." -ForegroundColor Green
+    else {
+        Write-Success "Python is now available."
+    }
+}
+else {
+    Write-Success "Python is already installed at $($pythonCmd.Source)"
 }
 
-# Install uv package manager
-Write-Host "`nInstalling uv package manager..." -ForegroundColor Cyan
+# Step 4: Navigate to the extracted project folder
+$projectPath = Join-Path $extractPath $projectFolder
+if (-not (Test-Path $projectPath)) {
+    Write-ErrorMsg "Extracted folder '$projectFolder' not found at $extractPath"
+    exit 1
+}
+Write-Info "Changing to directory: $projectPath"
+Set-Location $projectPath
+
+# Step 5: Run python setup.py
+Write-Info "Running python setup.py ..."
 try {
-    # Use python -m pip to ensure we're using the correct Python
-    python -m pip install --user uv -i https://mirrors.aliyun.com/pypi/simple/
-    Write-Host "✓ uv installed successfully." -ForegroundColor Green
-} catch {
-    Write-Host "✗ Failed to install uv." -ForegroundColor Red
-    Write-Host "  Try running: python -m pip install --user uv" -ForegroundColor Gray
+    python setup.py
+    Write-Success "Setup completed successfully."
+}
+catch {
+    Write-ErrorMsg "Failed to run python setup.py. $_"
     exit 1
 }
 
-# Refresh PATH to include user Scripts directory (where uv is installed)
-$userScripts = "$env:APPDATA\Python\Python3*\Scripts"
-if (Test-Path $userScripts) {
-    $env:Path = "$userScripts;$env:Path"
-}
-
-# Install dependencies using uv
-Write-Host "`nInstalling project dependencies with uv..." -ForegroundColor Cyan
-try {
-    # Get the actual Python executable path for uv
-    $pythonExe = python -c "import sys; print(sys.executable)"
-    
-    # Install with --only-binary :all: for faster, more reliable installs
-    uv pip install -r requirements.txt --python $pythonExe --only-binary :all:
-    
-    Write-Host "✓ Dependencies installed successfully." -ForegroundColor Green
-} catch {
-    Write-Host "✗ Failed to install dependencies." -ForegroundColor Red
-    Write-Host "  Check your requirements.txt and network connection." -ForegroundColor Gray
-    exit 1
-}
-
-# Final verification
-Write-Host "`n" + ("="*50) -ForegroundColor Green
-Write-Host "✓ Installation completed successfully!" -ForegroundColor Green
-Write-Host "="*50 -ForegroundColor Green
-Write-Host "`nYou can now run the project:" -ForegroundColor Cyan
-Write-Host "  python main.py" -ForegroundColor White
-Write-Host "`nTip: Use 'uv run python main.py' to run in isolated environment." -ForegroundColor Gray
+Write-Success "All tasks completed."
