@@ -1,146 +1,94 @@
 #!/bin/bash
 
-# Linux installation script for Wnclient project
-# This script automatically configures Python and installs dependencies
+# Stop on errors
+set -e
 
-echo "Starting installation for Wnclient project..."
+# Variables
+ZIP_URL="https://github.com/hexo141/Wnclient/archive/refs/heads/main.zip"
+ZIP_FILE="/tmp/Wnclient-main.zip"
+EXTRACT_PATH="."                     # Extract to current directory
+PROJECT_FOLDER="Wnclient-main"
 
-# Function to check if a command exists
-command_exists() {
-    command -v "$1" >/dev/null 2>&1
+# Colors for output (optional)
+GREEN='\033[0;32m'
+CYAN='\033[0;36m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
+info() {
+    echo -e "${CYAN}[INFO] $1${NC}"
 }
 
-# Check for required tools
-if ! command_exists curl && ! command_exists wget; then
-    echo "Error: Neither curl nor wget is installed. Please install one of them."
-    exit 1
-fi
-
-# Function to download file
-download_file() {
-    local url="$1"
-    local output="$2"
-    if command_exists curl; then
-        curl -L -o "$output" "$url"
-    elif command_exists wget; then
-        wget -O "$output" "$url"
-    fi
+success() {
+    echo -e "${GREEN}[SUCCESS] $1${NC}"
 }
 
-# Download client files from GitHub
-echo "Downloading Wnclient files from GitHub..."
-REPO_URL="https://github.com/hexo141/Wnclient/archive/refs/heads/main.zip"
-DOWNLOAD_DIR="/tmp/wnclient_download"
-ZIP_FILE="$DOWNLOAD_DIR/main.zip"
-
-# Create temporary directory
-mkdir -p "$DOWNLOAD_DIR"
-
-# Download the zip file
-if download_file "$REPO_URL" "$ZIP_FILE"; then
-    echo "Download completed successfully."
-else
-    echo "Failed to download from $REPO_URL"
+error() {
+    echo -e "${RED}[ERROR] $1${NC}" >&2
     exit 1
-fi
+}
 
-# Check if unzip is installed
-if ! command_exists unzip; then
-    echo "unzip is not installed. Installing unzip..."
-    if command_exists apt; then
-        sudo apt update && sudo apt install -y unzip
-    elif command_exists yum; then
-        sudo yum install -y unzip
-    elif command_exists dnf; then
-        sudo dnf install -y unzip
-    elif command_exists pacman; then
-        sudo pacman -S --noconfirm unzip
+# Step 1: Download the ZIP file
+info "Downloading repository from $ZIP_URL ..."
+if command -v wget >/dev/null 2>&1; then
+    wget -q -O "$ZIP_FILE" "$ZIP_URL" || error "Failed to download with wget."
+elif command -v curl >/dev/null 2>&1; then
+    curl -s -L -o "$ZIP_FILE" "$ZIP_URL" || error "Failed to download with curl."
+else
+    error "Neither wget nor curl is installed. Please install one and try again."
+fi
+success "Download completed: $ZIP_FILE"
+
+# Step 2: Extract the ZIP
+info "Extracting $ZIP_FILE to $EXTRACT_PATH ..."
+if ! command -v unzip >/dev/null 2>&1; then
+    error "unzip is not installed. Please install it (e.g., sudo apt install unzip) and try again."
+fi
+unzip -q "$ZIP_FILE" -d "$EXTRACT_PATH" || error "Failed to extract ZIP file."
+success "Extraction completed."
+
+# Step 3: Check for Python installation
+info "Checking for Python installation..."
+if command -v python3 >/dev/null 2>&1; then
+    success "Python3 is already installed: $(python3 --version)"
+else
+    info "Python3 not found. Attempting to install..."
+
+    # Detect package manager and install python3
+    if command -v apt >/dev/null 2>&1; then
+        info "Using apt to install python3..."
+        sudo apt update && sudo apt install -y python3 python3-pip || error "Failed to install python3 via apt."
+    elif command -v yum >/dev/null 2>&1; then
+        info "Using yum to install python3..."
+        sudo yum install -y python3 python3-pip || error "Failed to install python3 via yum."
+    elif command -v dnf >/dev/null 2>&1; then
+        info "Using dnf to install python3..."
+        sudo dnf install -y python3 python3-pip || error "Failed to install python3 via dnf."
+    elif command -v pacman >/dev/null 2>&1; then
+        info "Using pacman to install python3..."
+        sudo pacman -S --noconfirm python python-pip || error "Failed to install python3 via pacman."
     else
-        echo "Please install unzip manually."
-        exit 1
+        error "No supported package manager found. Please install python3 manually."
+    fi
+
+    # Verify installation
+    if command -v python3 >/dev/null 2>&1; then
+        success "Python3 installed successfully: $(python3 --version)"
+    else
+        error "Python3 installation failed. Please install it manually."
     fi
 fi
 
-# Extract the zip file
-echo "Extracting files..."
-unzip -q "$ZIP_FILE" -d "$DOWNLOAD_DIR"
-
-# Find the extracted directory (will be named Wnclient-main)
-EXTRACTED_DIR=$(find "$DOWNLOAD_DIR" -maxdepth 1 -type d -name "Wnclient-main" | head -n 1)
-
-if [ -z "$EXTRACTED_DIR" ]; then
-    echo "Failed to find extracted files."
-    exit 1
+# Step 4: Navigate to the extracted project folder
+PROJECT_PATH="$EXTRACT_PATH/$PROJECT_FOLDER"
+if [ ! -d "$PROJECT_PATH" ]; then
+    error "Extracted folder '$PROJECT_FOLDER' not found at $EXTRACT_PATH"
 fi
+info "Changing to directory: $PROJECT_PATH"
+cd "$PROJECT_PATH"
 
-# Copy files to current directory (or specified target)
-TARGET_DIR="${1:-.}"
-echo "Copying files to $TARGET_DIR..."
+# Step 5: Run python setup.py
+info "Running python setup.py ..."
+python3 setup.py || error "Failed to run python setup.py"
 
-# Copy all files except .git, .github, etc.
-rsync -av --exclude='.git' --exclude='.github' --exclude='__pycache__' "$EXTRACTED_DIR/" "$TARGET_DIR/" 2>/dev/null || cp -r "$EXTRACTED_DIR"/* "$TARGET_DIR/"
-
-# Clean up
-rm -rf "$DOWNLOAD_DIR"
-echo "Files downloaded and extracted successfully."
-
-# Check if Python 3 is installed
-if command_exists python3; then
-    PYTHON_VERSION=$(python3 --version)
-    echo "Python 3 is already installed: $PYTHON_VERSION"
-else
-    echo "Python 3 is not installed. Installing Python 3..."
-    # Detect package manager and install Python 3
-    if command_exists apt; then
-        # Debian/Ubuntu
-        sudo apt update
-        sudo apt install -y python3 python3-pip python3-venv
-    elif command_exists yum; then
-        # CentOS/RHEL
-        sudo yum install -y python3 python3-pip
-    elif command_exists dnf; then
-        # Fedora
-        sudo dnf install -y python3 python3-pip
-    elif command_exists pacman; then
-        # Arch Linux
-        sudo pacman -S --noconfirm python python-pip
-    else
-        echo "Unsupported package manager. Please install Python 3 manually."
-        exit 1
-    fi
-    echo "Python 3 installed successfully."
-fi
-
-# Install uv package manager
-echo "Installing uv package manager..."
-if command_exists pip3; then
-    pip3 install --user uv
-elif command_exists pip; then
-    pip install --user uv
-else
-    echo "pip not found. Please check Python installation."
-    exit 1
-fi
-
-# Add local bin to PATH if not already there
-export PATH="$HOME/.local/bin:$PATH"
-
-# Verify uv installation
-if ! command_exists uv; then
-    echo "uv installation failed. Please check your PATH or Python installation."
-    exit 1
-fi
-
-echo "uv installed successfully."
-
-# Install dependencies using uv
-echo "Installing project dependencies..."
-if uv pip install -r requirements.txt --python "$(python3 -c 'import sys; print(sys.executable)')" --only-binary :all:; then
-    echo "Dependencies installed successfully."
-else
-    echo "Failed to install dependencies. Please check the error messages above."
-    exit 1
-fi
-
-echo "Installation completed! You can now run the project."
-echo "To run: python3 main.py"
+success "All tasks completed."
