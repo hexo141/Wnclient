@@ -4,4 +4,4 @@ Description = "An automatic backup tool for client data"
 Author = "Wnclient Dev Team"
 Dependence = []
 platforms = ["Windows","Linux"]
-UseThreads = true
+Run_in_the_background = true

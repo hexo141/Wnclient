@@ -4,4 +4,4 @@ Description = "Show system information in a visually appealing way"
 Author = "Wnclient Dev Team"
 Dependence = ["psutil", "rich","screeninfo"]
 platforms = ["Windows","Linux", "Darwin"]
-UseThreads = false
+Run_in_the_background = false

@@ -22,7 +22,7 @@ function getOS() {
 }
 
 if (getOS() == "Windows") {
-    document.getElementsByClassName("code-text")[0].innerText = "iex (New-Object Net.WebClient).DownloadString('" + window.location.origin + "/Website/install.ps1" + "')";
+    document.getElementsByClassName("code-text")[0].innerText = "powershell -c iex (New-Object Net.WebClient).DownloadString('" + window.location.origin + "/InstallScript/install.ps1" + "')";
 } else if (getOS() == "Linux") {
-    document.getElementsByClassName("code-text")[0].innerText = "curl -sL " + window.location.origin + "/Website/install.sh | bash";
+    document.getElementsByClassName("code-text")[0].innerText = "curl -sL " + window.location.origin + "/InstallScript/install.sh | bash";
 }

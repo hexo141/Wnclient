@@ -123,8 +123,9 @@ def load_mods(modlist_path='Modlist.json',mod_name="*",type="Normal"):
                 lwjgl.warning(f"Mod {mod_name} is not supported on {platform.system()} platform. Skipping load.")
                 continue
             if type == "AutoLoad":
+                # 设置自动加载
                 autoload = modlist[mod_name].get('AutoLoad', False)
-                enable_threads = toml.load(open(mod_toml_path)).get('UseThreads', False)
+                enable_threads = toml.load(open(mod_toml_path)).get('Run_in_the_background', False)
                 if (autoload is False) or (enable_threads is False):
                     continue
             lwjgl.info(f"Loading mod: {mod_name} | Version: {toml.load(open(mod_toml_path)).get('Version', 'N/A')} | Author: {toml.load(open(mod_toml_path)).get('Author', 'Unknown')}")

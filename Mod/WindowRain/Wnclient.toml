@@ -4,4 +4,4 @@ Description = "Mimic the effect of rain on the tabletop"
 Author = "Wnclient Dev Team"
 Dependence = ["pyside6"]
 platforms = ["Windows"]
-UseThreads = true
+Run_in_the_background = true

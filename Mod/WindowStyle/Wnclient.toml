@@ -4,4 +4,4 @@ Description = "A module to apply acrylic blur effect to Windows application wind
 Author = "Wnclient Dev Team"
 Dependence = ["ctypes","pywin32"]
 platforms = ["Windows"]
-UseThreads = false
+Run_in_the_background = false

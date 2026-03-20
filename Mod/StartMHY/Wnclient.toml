@@ -4,4 +4,4 @@ Description = "Start Genshin Impact with custom settings"
 Author = "Wnclient Dev Team"
 Dependence = ["pygame","tk"]
 platforms = ["Windows"]
-UseThreads = true
+Run_in_the_background = true

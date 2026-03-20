@@ -4,4 +4,4 @@ Description = "A time manipulation tool for Windows applications"
 Author = "Wnclient Dev Team"
 Dependence = ["pywin32"]
 platforms = ["Windows"]
-UseThreads = false
+Run_in_the_background = false
