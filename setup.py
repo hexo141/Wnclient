@@ -12,7 +12,7 @@ def Setup():
     print("[Info] uv management package installed successfully.")
     # 继续执行其他安装步骤
     try:
-        subprocess.run(['uv','pip', 'install', '-r', 'requirements.txt', '--python',sys.executable,'--only-binary', ':all:'], check=True)
+        subprocess.run(['uv','pip', 'install', '-r', 'requirements.txt', '--python',sys.executable], check=True)
     except Exception as e:
         print("[Error] Failed to install dependencies from requirements.txt:", e)
         exit(1)
