@@ -162,7 +162,7 @@ if ($pythonVersionOutput -match "Python (\d+)\.(\d+)") {
 Write-Host "`nInstalling uv package manager..." -ForegroundColor Cyan
 try {
     # Use python -m pip to ensure we're using the correct Python
-    python -m pip install --user uv
+    python -m pip install --user uv -i https://mirrors.aliyun.com/pypi/simple/
     Write-Host "✓ uv installed successfully." -ForegroundColor Green
 } catch {
     Write-Host "✗ Failed to install uv." -ForegroundColor Red
