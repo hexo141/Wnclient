@@ -1,5 +1,5 @@
 {
     "ignorecase": false,
     "custom_boot_txt": true,
-    "boot_txt_path": "Boot.txt"
+    "boot_ascii_path": "ascii.txt"
 }

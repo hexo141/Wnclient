@@ -420,7 +420,7 @@ if __name__ == "__main__":
     global enable_ignorecase
     enable_ignorecase = Client_config.get("ignorecase", False)
     if Client_config.get("custom_boot_txt", False):
-        with open(Client_config.get("boot_txt_path", "Boot.txt"), 'r', encoding='utf-8') as f:
+        with open(Client_config.get("boot_ascii_path", "Boot.txt"), 'r', encoding='utf-8') as f:
             boot_text = f.read()
             print(boot_text)
     try:
