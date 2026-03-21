@@ -40,6 +40,44 @@ function Write-ErrorMsg {
     Write-Host "[ERROR] $Message" -ForegroundColor Red
 }
 
+# Function to check if Python is truly installed (not the Microsoft Store placeholder)
+function Test-RealPython {
+    param([string]$pythonPath)
+    
+    # Check if it's the Microsoft Store placeholder
+    if ($pythonPath -like "*WindowsApps*") {
+        # Try to get real Python by checking multiple possible locations
+        $realPythonPaths = @(
+            "$env:LOCALAPPDATA\Programs\Python\Python313\python.exe",
+            "$env:LOCALAPPDATA\Programs\Python\Python312\python.exe",
+            "$env:LOCALAPPDATA\Programs\Python\Python311\python.exe",
+            "$env:ProgramFiles\Python313\python.exe",
+            "$env:ProgramFiles\Python312\python.exe",
+            "$env:ProgramFiles\Python311\python.exe",
+            "$env:ProgramFiles\Python310\python.exe"
+        )
+        
+        foreach ($path in $realPythonPaths) {
+            if (Test-Path $path) {
+                return $path
+            }
+        }
+        return $null
+    }
+    
+    # Check if it's a real Python executable
+    try {
+        $version = & $pythonPath --version 2>$null
+        if ($version -match "Python") {
+            return $pythonPath
+        }
+    }
+    catch {
+        return $null
+    }
+    return $null
+}
+
 # Step 1: Download the ZIP file
 Write-Info "Downloading repository from $zipUrl ..."
 try {
@@ -49,6 +87,7 @@ try {
 catch {
     Write-ErrorMsg "Failed to download the ZIP file. $_"
     pause
+    exit 1
 }
 
 # Step 2: Extract the ZIP
@@ -60,63 +99,109 @@ try {
 catch {
     Write-ErrorMsg "Failed to extract the ZIP file. $_"
     pause
+    exit 1
 }
 
 # Step 3: Check if Python is installed
 Write-Info "Checking for Python installation..."
 $pythonCmd = Get-Command python -ErrorAction SilentlyContinue
+$realPythonPath = $null
+
+if ($pythonCmd) {
+    $realPythonPath = Test-RealPython -pythonPath $pythonCmd.Source
+    if ($realPythonPath) {
+        Write-Success "Python is already installed at $realPythonPath"
+        # Update pythonCmd to point to real Python
+        $pythonCmd = Get-Command $realPythonPath -ErrorAction SilentlyContinue
+    }
+    else {
+        Write-Info "Found Microsoft Store Python placeholder at $($pythonCmd.Source). Will install real Python..."
+        $pythonCmd = $null
+    }
+}
+
 if (-not $pythonCmd) {
-    Write-Info "Python not found. Installing Python..."
+    Write-Info "Python not found or only Microsoft Store placeholder exists. Installing Python..."
+    
+    # Try to install Python using winget first
+    $wingetInstalled = $false
     try {
-    Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+        $wingetPath = Get-Command winget -ErrorAction SilentlyContinue
+        if ($wingetPath) {
+            Write-Info "Installing Python using winget..."
+            winget install Python.Python.3.13 --silent --accept-package-agreements
+            $wingetInstalled = $true
+        }
     }
     catch {
-        Write-ErrorMsg "Failed to install Chocolatey. $_"
-        $fallback = $true
+        Write-Info "winget installation failed or not available."
     }
-
-
-    if ($fallback) {
-        # Fallback: download Python installer from official site
-        Write-Info "Downloading Python installer from python.org..."
-        $pythonInstallerUrl = "https://mirrors.aliyun.com/python-release/windows/python-3.13.12-amd64.exe"   # Adjust version as needed
+    
+    # If winget failed or not available, use direct download
+    if (-not $wingetInstalled) {
+        # Download Python installer from official site
+        Write-Info "Downloading Python installer from mirrors.aliyun.com..."
+        $pythonInstallerUrl = "https://mirrors.aliyun.com/python-release/windows/python-3.13.12-amd64.exe"
         $installerPath = "$env:TEMP\python-installer.exe"
         try {
             Invoke-WebRequest -Uri $pythonInstallerUrl -OutFile $installerPath -UseBasicParsing
-        }
-        catch {
-            Write-ErrorMsg "Failed to download Python installer. $_"
-            pause
-        }
-
-        Write-Info "Installing Python silently..."
-        try {
+            Write-Info "Installing Python silently..."
             Start-Process -FilePath $installerPath -ArgumentList "/quiet InstallAllUsers=1 PrependPath=1" -Wait -NoNewWindow
             Write-Success "Python installation completed via installer."
         }
         catch {
-            Write-ErrorMsg "Python installation failed. $_"
+            Write-ErrorMsg "Failed to download or install Python. $_"
             pause
+            exit 1
         }
         finally {
             Remove-Item $installerPath -ErrorAction SilentlyContinue
         }
     }
-
+    
     # Refresh PATH environment variable in current session
     $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
-    # Verify again
-    $pythonCmd = Get-Command python -ErrorAction SilentlyContinue
-    if (-not $pythonCmd) {
+    
+    # Wait a moment for the system to register the new installation
+    Start-Sleep -Seconds 2
+    
+    # Verify Python installation by checking actual installation paths
+    $possiblePaths = @(
+        "$env:LOCALAPPDATA\Programs\Python\Python313\python.exe",
+        "$env:LOCALAPPDATA\Programs\Python\Python312\python.exe",
+        "$env:ProgramFiles\Python313\python.exe",
+        "$env:ProgramFiles\Python312\python.exe"
+    )
+    
+    $foundPython = $false
+    foreach ($path in $possiblePaths) {
+        if (Test-Path $path) {
+            $realPythonPath = $path
+            $foundPython = $true
+            break
+        }
+    }
+    
+    # Also try getting from PATH again
+    if (-not $foundPython) {
+        $pythonCmd = Get-Command python -ErrorAction SilentlyContinue
+        if ($pythonCmd) {
+            $realPythonPath = Test-RealPython -pythonPath $pythonCmd.Source
+            if ($realPythonPath) {
+                $foundPython = $true
+            }
+        }
+    }
+    
+    if (-not $foundPython) {
         Write-ErrorMsg "Python still not found after installation. Please check manually."
         pause
+        exit 1
     }
     else {
-        Write-Success "Python is now available."
+        Write-Success "Python is now available at $realPythonPath"
+        $pythonCmd = Get-Command $realPythonPath -ErrorAction SilentlyContinue
     }
-}
-else {
-    Write-Success "Python is already installed at $($pythonCmd.Source)"
 }
 
 # Step 4: Navigate to the extracted project folder
@@ -124,6 +209,7 @@ $projectPath = Join-Path $extractPath $projectFolder
 if (-not (Test-Path $projectPath)) {
     Write-ErrorMsg "Extracted folder '$projectFolder' not found at $extractPath"
     pause
+    exit 1
 }
 Write-Info "Changing to directory: $projectPath"
 Set-Location $projectPath
@@ -131,12 +217,19 @@ Set-Location $projectPath
 # Step 5: Run python setup.py
 Write-Info "Running python setup.py ..."
 try {
-    python setup.py
+    # Use the actual Python executable path to avoid any PATH issues
+    if ($realPythonPath) {
+        & $realPythonPath setup.py
+    }
+    else {
+        python setup.py
+    }
     Write-Success "Setup completed successfully."
 }
 catch {
     Write-ErrorMsg "Failed to run python setup.py. $_"
     pause
+    exit 1
 }
 
 Write-Success "All tasks completed."
