@@ -206,4 +206,4 @@ else
     exit 1
 fi
 
-print_success "All tasks completed."
+print_success "All tasks completed.You can now run the program using python main.py"

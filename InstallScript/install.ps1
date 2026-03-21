@@ -232,4 +232,4 @@ catch {
     exit 1
 }
 
-Write-Success "All tasks completed."
+Write-Success "All tasks completed.You can now run the program using python main.py"
