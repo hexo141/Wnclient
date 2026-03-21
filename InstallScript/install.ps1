@@ -67,29 +67,19 @@ Write-Info "Checking for Python installation..."
 $pythonCmd = Get-Command python -ErrorAction SilentlyContinue
 if (-not $pythonCmd) {
     Write-Info "Python not found. Installing Python..."
-
-    # Try winget (available on Windows 10/11)
-    $winget = Get-Command winget -ErrorAction SilentlyContinue
-    if ($winget) {
-        Write-Info "Using winget to install Python..."
-        try {
-            winget install Python.Python --silent --accept-package-agreements --accept-source-agreements
-            Write-Success "Python installed via winget."
-        }
-        catch {
-            Write-ErrorMsg "winget installation failed. Trying fallback method."
-            $fallback = $true
-        }
+    try {
+    Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
     }
-    else {
-        Write-Info "winget not found. Using fallback installation method."
+    catch {
+        Write-ErrorMsg "Failed to install Chocolatey. $_"
         $fallback = $true
     }
+
 
     if ($fallback) {
         # Fallback: download Python installer from official site
         Write-Info "Downloading Python installer from python.org..."
-        $pythonInstallerUrl = "https://www.python.org/ftp/python/3.12.3/python-3.12.3-amd64.exe"   # Adjust version as needed
+        $pythonInstallerUrl = "https://mirrors.aliyun.com/python-release/windows/python-3.13.12-amd64.exe"   # Adjust version as needed
         $installerPath = "$env:TEMP\python-installer.exe"
         try {
             Invoke-WebRequest -Uri $pythonInstallerUrl -OutFile $installerPath -UseBasicParsing
