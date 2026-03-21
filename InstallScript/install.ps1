@@ -48,7 +48,7 @@ try {
 }
 catch {
     Write-ErrorMsg "Failed to download the ZIP file. $_"
-    exit 1
+    pause
 }
 
 # Step 2: Extract the ZIP
@@ -59,7 +59,7 @@ try {
 }
 catch {
     Write-ErrorMsg "Failed to extract the ZIP file. $_"
-    exit 1
+    pause
 }
 
 # Step 3: Check if Python is installed
@@ -86,7 +86,7 @@ if (-not $pythonCmd) {
         }
         catch {
             Write-ErrorMsg "Failed to download Python installer. $_"
-            exit 1
+            pause
         }
 
         Write-Info "Installing Python silently..."
@@ -96,7 +96,7 @@ if (-not $pythonCmd) {
         }
         catch {
             Write-ErrorMsg "Python installation failed. $_"
-            exit 1
+            pause
         }
         finally {
             Remove-Item $installerPath -ErrorAction SilentlyContinue
@@ -109,7 +109,7 @@ if (-not $pythonCmd) {
     $pythonCmd = Get-Command python -ErrorAction SilentlyContinue
     if (-not $pythonCmd) {
         Write-ErrorMsg "Python still not found after installation. Please check manually."
-        exit 1
+        pause
     }
     else {
         Write-Success "Python is now available."
@@ -123,7 +123,7 @@ else {
 $projectPath = Join-Path $extractPath $projectFolder
 if (-not (Test-Path $projectPath)) {
     Write-ErrorMsg "Extracted folder '$projectFolder' not found at $extractPath"
-    exit 1
+    pause
 }
 Write-Info "Changing to directory: $projectPath"
 Set-Location $projectPath
@@ -136,7 +136,7 @@ try {
 }
 catch {
     Write-ErrorMsg "Failed to run python setup.py. $_"
-    exit 1
+    pause
 }
 
 Write-Success "All tasks completed."
