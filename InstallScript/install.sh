@@ -186,14 +186,14 @@ fi
 # Step 4: Navigate to the extracted project folder
 PROJECT_PATH="$EXTRACT_PATH/$PROJECT_FOLDER"
 print_info "Changing to directory: $PROJECT_PATH"
-cd "$PROJECT_PATH" + "/InstallScript"
 
-# Step 5: Run python setup.py
+# Step 5: Run python setup.py (setup.py should be in the root of PROJECT_PATH)
 print_info "Running setup.py ..."
+cd "$PROJECT_PATH"
 if command -v python &> /dev/null; then
-    python ../setup.py
+    python setup.py
 elif command -v python3 &> /dev/null; then
-    python3 ../setup.py
+    python3 setup.py
 else
     print_error "Python command not found even after installation."
     exit 1
@@ -201,6 +201,7 @@ fi
 
 if [ $? -eq 0 ]; then
     print_success "Setup completed successfully."
+    cd "InstallScript"
     print_info "Running gen_path.py to generate necessary paths..."
     if command -v python &> /dev/null; then
         python gen_path.py
@@ -215,4 +216,5 @@ else
     exit 1
 fi
 
-print_success "All tasks completed.You can now run the program using 'python main.py'"
+cd "../"
+print_success "All tasks completed. You can now run the program using 'python main.py'"

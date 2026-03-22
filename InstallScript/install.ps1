@@ -223,8 +223,6 @@ try {
     }
     else {
         python setup.py
-        Set-Location $projectPath + "\InstallScript"
-        python gen_path.py
     }
     Write-Success "Setup completed successfully."
 }
@@ -233,5 +231,7 @@ catch {
     pause
     exit 1
 }
-
+Set-Location "InstallScript"
+python gen_path.py
+Set-Location "../"
 Write-Success "All tasks completed.You can now run the program using 'python main.py'"
