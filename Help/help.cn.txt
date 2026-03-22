@@ -5,7 +5,7 @@
         use <mod_name> <func> <para> <para1> ...
         use <mod_name> 
     2.set_ppl:
-        将当前进程设置为ppl等级
+        设置客户端ppl等级
     3.Getit:
         用TrustedInstaller权限打开可执行程序
     4.Run_As_Admin：
