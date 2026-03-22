@@ -1,15 +1,19 @@
 :root {
-    --bg-color: #ffffff;
-    --body-bg: #f9fafb;
-    --text-primary: #111827;
-    --text-secondary: #6b7280;
-    --border-color: #e5e7eb;
-    --accent-color: #111827;
-    --accent-hover: #374151;
-    --code-bg: #f3f4f6;
-    --success-color: #059669;
+    /* 玻璃黑主题变量 */
+    --bg-color: rgba(30, 30, 35, 0.65);
+    --body-bg: rgba(18, 18, 22, 0.85);
+    --text-primary: #f9fafb;
+    --text-secondary: #9ca3af;
+    --border-color: rgba(255, 255, 255, 0.12);
+    --border-highlight: rgba(255, 255, 255, 0.25);
+    --accent-color: #ffffff;
+    --accent-hover: rgba(255, 255, 255, 0.85);
+    --code-bg: rgba(45, 45, 52, 0.55);
+    --success-color: #10b981;
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+    --glass-inset: inset 0 1px 1px rgba(255, 255, 255, 0.1);
     --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    --font-mono: "SF Mono", "Fira Code", "Roboto Mono", monospace;
+    --font-mono: "SF Mono", SF Mono, Consolas, "Liberation Mono", Menlo, Courier, monospace;
 }
 
 * {
@@ -20,7 +24,6 @@
 
 body {
     font-family: var(--font-main);
-    background-color: var(--body-bg);
     color: var(--text-primary);
     display: flex;
     justify-content: center;
@@ -28,16 +31,69 @@ body {
     min-height: 100vh;
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
+    position: relative;
+    overflow-x: hidden;
 }
 
+/* 独立背景层：仅背景图模糊，不影响内容 */
+body::before {
+    content: "";
+    position: fixed;
+    top: -20px;
+    left: -20px;
+    right: -20px;
+    bottom: -20px;
+    background-image: url('https://www.dmoe.cc/random.php');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    /* 仅对背景层应用模糊 */
+    filter: blur(12px);
+    transform: scale(1.08);
+    z-index: -2;
+    pointer-events: none;
+}
+
+/* 暗色遮罩层：提升文字可读性，不模糊 */
+body::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(15, 15, 18, 0.75) 0%, rgba(26, 26, 32, 0.85) 50%, rgba(15, 15, 18, 0.75) 100%);
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* 内容容器：玻璃拟态效果 */
 .container {
     background: var(--bg-color);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--border-color);
-    border-radius: 12px;
+    border-top-color: var(--border-highlight);
+    border-left-color: var(--border-highlight);
+    border-radius: 16px;
     padding: 32px;
     width: 100%;
     max-width: 640px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    box-shadow: var(--glass-shadow);
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.container::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    pointer-events: none;
 }
 
 .header {
@@ -51,10 +107,12 @@ body {
     color: var(--accent-color);
     padding: 8px;
     border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
+    background: var(--code-bg);
+    backdrop-filter: blur(10px);
 }
 
 .title {
@@ -63,6 +121,7 @@ body {
     color: var(--text-primary);
     margin-bottom: 4px;
     letter-spacing: -0.025em;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.4);
 }
 
 .subtitle {
@@ -79,17 +138,21 @@ body {
     font-weight: 500;
     color: var(--text-secondary);
     background: var(--body-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     padding: 6px 12px;
-    border-radius: 6px;
+    border-radius: 8px;
     border: 1px solid var(--border-color);
     margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
 }
 
 .status-dot {
     width: 6px;
     height: 6px;
-    background-color: var(--accent-color);
+    background-color: var(--success-color);
     border-radius: 50%;
+    box-shadow: 0 0 12px var(--success-color);
 }
 
 .code-block {
@@ -97,15 +160,19 @@ body {
     justify-content: space-between;
     align-items: center;
     background: var(--code-bg);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border-radius: 12px;
     padding: 16px;
     gap: 16px;
-    transition: border-color 0.2s;
+    transition: all 0.25s ease;
+    box-shadow: var(--glass-inset);
 }
 
 .code-block:hover {
-    border-color: var(--accent-color);
+    border-color: var(--border-highlight);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35), var(--glass-inset);
 }
 
 .code-content {
@@ -120,6 +187,7 @@ body {
     color: var(--text-secondary);
     font-weight: 600;
     user-select: none;
+    opacity: 0.9;
 }
 
 .code-text {
@@ -128,32 +196,35 @@ body {
     color: var(--text-primary);
     white-space: nowrap;
     overflow-x: auto;
-    scrollbar-width: none; /* Firefox */
+    scrollbar-width: none;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.4);
 }
 
 .code-text::-webkit-scrollbar {
-    display: none; /* Chrome/Safari */
+    display: none;
 }
 
 .copy-btn {
     display: flex;
     align-items: center;
     gap: 8px;
-    background: transparent;
+    background: rgba(255, 255, 255, 0.08);
     border: 1px solid var(--border-color);
     color: var(--text-primary);
-    padding: 8px 12px;
-    border-radius: 6px;
+    padding: 8px 14px;
+    border-radius: 10px;
     cursor: pointer;
     font-size: 13px;
     font-weight: 500;
     transition: all 0.2s ease;
     flex-shrink: 0;
+    backdrop-filter: blur(8px);
 }
 
 .copy-btn:hover {
-    background: var(--bg-color);
-    border-color: var(--accent-color);
+    background: rgba(255, 255, 255, 0.16);
+    border-color: var(--border-highlight);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .copy-btn:active {
@@ -163,6 +234,8 @@ body {
 .copy-btn.copied {
     border-color: var(--success-color);
     color: var(--success-color);
+    background: rgba(16, 185, 129, 0.15);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
 }
 
 .copy-btn .icon-check {
@@ -177,7 +250,30 @@ body {
     display: block;
 }
 
-/* Responsive */
+/* 输入框聚焦效果 */
+input:focus, textarea:focus {
+    outline: none;
+    border-color: var(--border-highlight);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.15);
+}
+
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+
 @media (max-width: 600px) {
     .code-block {
         flex-direction: column;
@@ -193,4 +289,15 @@ body {
         white-space: normal;
         word-break: break-all;
     }
+    
+    .container {
+        margin: 16px;
+        padding: 24px;
+    }
+}
+
+
+::selection {
+    background: rgba(255, 255, 255, 0.3);
+    color: var(--text-primary);
 }
