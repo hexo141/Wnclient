@@ -1,0 +1,144 @@
+Mod开发教程
+==========
+
+本教程将指导您如何为Wnclient开发自己的Mod。
+
+Mod结构
+--------
+每个Mod都是一个独立的目录，位于Mod/文件夹下。Mod目录包含以下文件：
+
+1. [ModName].py - 主Python文件
+2. Mappings.json - 函数映射配置
+3. Wnclient.toml - Mod元数据
+
+步骤1: 创建Mod目录
+------------------
+在Mod/文件夹下创建一个新的目录，名称即为您的Mod名称。
+例如: Mod/MyMod/
+
+步骤2: 编写Python代码
+--------------------
+创建[ModName].py文件，实现您的Mod功能。
+
+示例代码 (MyMod.py):
+```python
+def hello(name="World"):
+    print(f"Hello, {name}!")
+
+def add(a, b):
+    return a + b
+
+def main():
+    hello()
+    result = add(5, 3)
+    print(f"5 + 3 = {result}")
+```
+
+步骤3: 创建Mappings.json
+------------------------
+此文件定义Mod的函数映射和参数。
+
+格式:
+```json
+{
+    "function_name": {
+        "func": "actual_function_name",
+        "Parameters": {
+            "param_name": {
+                "type": "str|int|float|bool",
+                "isRequired": true|false
+            }
+        }
+    }
+}
+```
+
+示例 (Mappings.json):
+```json
+{
+    "hello": {
+        "func": "hello",
+        "Parameters": {
+            "name": {
+                "type": "str",
+                "isRequired": false
+            }
+        }
+    },
+    "add": {
+        "func": "add",
+        "Parameters": {
+            "a": {
+                "type": "int",
+                "isRequired": true
+            },
+            "b": {
+                "type": "int",
+                "isRequired": true
+            }
+        }
+    },
+    "main": {
+        "func": "main",
+        "Parameters": {}
+    }
+}
+```
+
+步骤4: 创建Wnclient.toml
+-----------------------
+此文件包含Mod的元数据。
+
+格式:
+```toml
+Name = "Mod名称"
+Version = "1.0.0"
+Description = "Mod描述"
+Author = "作者名"
+Dependence = ["依赖1", "依赖2"]
+platforms = ["Windows", "Linux", "Darwin"]
+Run_in_the_background = false
+```
+
+示例 (Wnclient.toml):
+```toml
+Name = "MyMod"
+Version = "1.0.0"
+Description = "我的第一个Mod示例"
+Author = "开发者"
+Dependence = []
+platforms = ["Windows", "Linux", "Darwin"]
+Run_in_the_background = false
+```
+
+步骤5: 测试Mod
+-------------
+使用客户端命令测试您的Mod:
+```
+use MyMod main
+use MyMod hello Alice
+use MyMod add 10 20
+```
+
+步骤6: 发布Mod
+-------------
+确保您的Mod代码完整且文档齐全，然后提交到项目中。
+
+最佳实践
+--------
+1. 使用描述性的函数和变量名
+2. 添加适当的错误处理
+3. 在Wnclient.toml中列出所有依赖
+4. 测试Mod在所有支持的平台上
+5. 提供清晰的使用说明
+
+常见问题
+--------
+Q: Mod不工作怎么办？
+A: 检查Mappings.json中的函数名是否与Python文件中的匹配。
+
+Q: 如何处理可选参数？
+A: 在Mappings.json中设置"isRequired": false，并为参数提供默认值。
+
+Q: 如何添加外部依赖？
+A: 在Wnclient.toml的Dependence数组中列出依赖包名。

@@ -1,0 +1,144 @@
+Mod Development Tutorial
+========================
+
+This tutorial will guide you through developing your own Mod for Wnclient.
+
+Mod Structure
+-------------
+Each Mod is a separate directory located in the Mod/ folder. The Mod directory contains the following files:
+
+1. [ModName].py - Main Python file
+2. Mappings.json - Function mapping configuration
+3. Wnclient.toml - Mod metadata
+
+Step 1: Create Mod Directory
+----------------------------
+Create a new directory in the Mod/ folder with your Mod name.
+Example: Mod/MyMod/
+
+Step 2: Write Python Code
+-------------------------
+Create the [ModName].py file to implement your Mod functionality.
+
+Example code (MyMod.py):
+```python
+def hello(name="World"):
+    print(f"Hello, {name}!")
+
+def add(a, b):
+    return a + b
+
+def main():
+    hello()
+    result = add(5, 3)
+    print(f"5 + 3 = {result}")
+```
+
+Step 3: Create Mappings.json
+----------------------------
+This file defines the Mod's function mappings and parameters.
+
+Format:
+```json
+{
+    "function_name": {
+        "func": "actual_function_name",
+        "Parameters": {
+            "param_name": {
+                "type": "str|int|float|bool",
+                "isRequired": true|false
+            }
+        }
+    }
+}
+```
+
+Example (Mappings.json):
+```json
+{
+    "hello": {
+        "func": "hello",
+        "Parameters": {
+            "name": {
+                "type": "str",
+                "isRequired": false
+            }
+        }
+    },
+    "add": {
+        "func": "add",
+        "Parameters": {
+            "a": {
+                "type": "int",
+                "isRequired": true
+            },
+            "b": {
+                "type": "int",
+                "isRequired": true
+            }
+        }
+    },
+    "main": {
+        "func": "main",
+        "Parameters": {}
+    }
+}
+```
+
+Step 4: Create Wnclient.toml
+---------------------------
+This file contains the Mod's metadata.
+
+Format:
+```toml
+Name = "Mod Name"
+Version = "1.0.0"
+Description = "Mod description"
+Author = "Author Name"
+Dependence = ["dependency1", "dependency2"]
+platforms = ["Windows", "Linux", "Darwin"]
+Run_in_the_background = false
+```
+
+Example (Wnclient.toml):
+```toml
+Name = "MyMod"
+Version = "1.0.0"
+Description = "My first Mod example"
+Author = "Developer"
+Dependence = []
+platforms = ["Windows", "Linux", "Darwin"]
+Run_in_the_background = false
+```
+
+Step 5: Test the Mod
+--------------------
+Test your Mod using client commands:
+```
+use MyMod main
+use MyMod hello Alice
+use MyMod add 10 20
+```
+
+Step 6: Publish the Mod
+-----------------------
+Ensure your Mod code is complete and well-documented, then submit it to the project.
+
+Best Practices
+--------------
+1. Use descriptive function and variable names
+2. Add appropriate error handling
+3. List all dependencies in Wnclient.toml
+4. Test the Mod on all supported platforms
+5. Provide clear usage instructions
+
+Frequently Asked Questions
+--------------------------
+Q: What if my Mod doesn't work?
+A: Check that function names in Mappings.json match those in the Python file.
+
+Q: How to handle optional parameters?
+A: Set "isRequired": false in Mappings.json and provide default values for parameters.
+
+Q: How to add external dependencies?
+A: List dependency package names in the Dependence array in Wnclient.toml.
