@@ -42,16 +42,18 @@ def set_ppl():
                 else:
                     lwjgl.info("Unzip the sys file")
                     try:
-                        with zipfile.ZipFile('Sys/RTCore64.zip', 'r') as zip_ref:
-                            zip_ref.extractall('./Temp/')
+                        with zipfile.ZipFile('Assets/Sys/RTCore64.zip', 'r') as zip_ref:
+                            zip_ref.extractall('./Temp')
                     except Exception as e:
                         lwjgl.warning(e)
                     parent = psutil.Process(os.getpid())
                     pids = [parent.pid]
                     for child in parent.children(recursive=True):
                         pids.append(child.pid)
+                    lwjgl.info("Delete old service if exists")
+                    subprocess.run("sc.exe delete RTCore64")
                     lwjgl.info("Create an SC service")
-                    subprocess.run(f'sc.exe create RTCore64 type= kernel start= auto binPath= "Temp/RTCore64.sys" DisplayName= "Micro - Star MSI Afterburner"')
+                    subprocess.run(f'sc.exe create RTCore64 type= kernel start= auto binPath= "./Temp/RTCore64.sys" DisplayName= "Micro - Star MSI Afterburner"')
                     lwjgl.info("Start the service")
                     subprocess.run("net start RTCore64")
                     for pid in pids:
@@ -426,7 +428,7 @@ if __name__ == "__main__":
     try:
         if os.path.exists("./Temp"):
             lwjgl.info("Del temp")
-            shutil.rmtree("./Temp/")
+            shutil.rmtree("./Temp")
         os.makedirs("./Temp")
     except Exception as e:
         lwjgl.warning(f"Can not delete some file: {e}")

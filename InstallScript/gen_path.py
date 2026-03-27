@@ -3,9 +3,13 @@ import subprocess
 import pathlib
 import os
 
+try:
+    os.makedirs("../Env_Bin", exist_ok=True)
+except Exception as e:
+    print(f"\033[0;31mFailed to create Env_Bin directory: {e}\033[0m")
 def gen_path_on_windows():
-    # 获取项目根目录（当前文件父目录的父目录）
-    root_dir = pathlib.Path(__file__).parent.parent.absolute()
+    # 获取项目根目录
+    root_dir = pathlib.Path(__file__).parent.parent.absolute() / "Env_Bin"
     bat_path = root_dir / "wncli.bat"
 
     # 创建批处理文件，用于在命令行中运行
@@ -49,7 +53,7 @@ if (-not $alreadyExists) {{
 
 def gen_path_on_linux():
     # 获取项目根目录
-    root_dir = pathlib.Path(__file__).parent.parent.absolute()
+    root_dir = pathlib.Path(__file__).parent.parent.absolute() / "Env_Bin"
     # 创建用户本地 bin 目录
     local_bin = pathlib.Path.home() / ".local" / "bin"
     local_bin.mkdir(parents=True, exist_ok=True)

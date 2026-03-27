@@ -41,7 +41,7 @@ function updateCommand() {
     
     // Set Command based on OS
     if (os === "Windows") {
-        commandElement.innerText = `powershell -c iex (New-Object Net.WebClient).DownloadString('${baseUrl}/InstallScript/install.ps1')`;
+        commandElement.innerText = `iex (New-Object Net.WebClient).DownloadString('${baseUrl}/InstallScript/install.ps1')`;
     } else if (os === "Linux" || os === "macOS" || os === "UNIX") {
         commandElement.innerText = `curl -sL ${baseUrl}/InstallScript/install.sh | bash`;
     } else {

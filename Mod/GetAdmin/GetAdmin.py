@@ -26,6 +26,8 @@ def Universal():
             else:
                 lwjgl.info("You have acquired administrator privileges, please use the new window")
                 exit()
+        else:
+            lwjgl.info("Already have administrator privileges")
     else:
         lwjgl.error("It can only run on Windows")
 
