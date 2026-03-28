@@ -1,8 +1,4 @@
 # /\_/\
-# ( o.o )
-#  > ^ <
-#
-# /\_/\
 # ( -.-)
 # / >📄
 import sys
@@ -74,7 +70,8 @@ func_dict = {"set_ppl": set_ppl,
              "Getit":Getit,
              "reload": wnc.reload_client,
              "modlist": wnc.modlist,
-             "help": wnc.help
+             "help": wnc.help,
+             "rcmd": wnc.rcmd
             }
 
 

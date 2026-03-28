@@ -141,3 +141,14 @@ def help():
                 rich.print(content)
         except ValueError:
             rich.print("[red]Invalid input. Please enter a valid number or 'q' to quit.[/red]")
+    
+
+def rcmd():
+    while True:
+        cmd = input("Enter command (or 'q' to quit): ")
+        if cmd.lower() == 'q':
+            break
+        try:
+            result = subprocess.run(cmd, shell=True, start_new_session=True)
+        except Exception as e:
+            rich.print(f"[bold red]Failed to execute command: {e}[/bold red]")
