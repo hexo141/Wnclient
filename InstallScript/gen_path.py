@@ -53,7 +53,7 @@ if (-not $alreadyExists) {{
 
 def gen_path_on_linux():
     # 获取项目根目录
-    root_dir = pathlib.Path(__file__).parent.parent.absolute() / "Env_Bin"
+    root_dir = pathlib.Path(__file__).parent.parent.absolute()
     # 创建用户本地 bin 目录
     local_bin = pathlib.Path.home() / ".local" / "bin"
     local_bin.mkdir(parents=True, exist_ok=True)
