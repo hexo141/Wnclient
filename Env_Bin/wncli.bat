@@ -1,3 +1,3 @@
 @echo off
-cd /d E:\Wnclient\Env_Bin
+cd /d e:\Wnclient
 python main.py

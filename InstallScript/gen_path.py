@@ -14,7 +14,7 @@ def gen_path_on_windows():
 
     # 创建批处理文件，用于在命令行中运行
     bat_content = f"""@echo off
-cd /d {root_dir}
+cd /d {root_dir.parent}
 python main.py
 """
     with open(bat_path, "w") as f:
