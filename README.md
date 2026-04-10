@@ -1,7 +1,11 @@
 # Wnclient 使用指南
-[![github](https://img.shields.io/badge/github-hexo141-black?style=flat-square&logo=github&logoColor=white&labelColor=4682B4)](https://github.com/hexo141)  [![mikufans](https://img.shields.io/badge/Mikufans-hexo141-black?style=flat-square&logo=bilibili&logoColor=white&labelColor=ff69b4)](https://space.bilibili.com/3494353628564285)  ![GitHub Repo stars](https://img.shields.io/github/stars/hexo141/Wnclient?style=flat-square&logo=github&logoColor=white&label=Stars&labelColor=4682B4&color=black)  ![GitHub forks](https://img.shields.io/github/forks/hexo141/Wnclient?style=flat-square&logo=github&logoColor=white&label=Forks&labelColor=4682B4&color=black)  ![GitHub repo size](https://img.shields.io/github/repo-size/hexo141/Wnclient?style=flat-square&logo=github&logoColor=white&label=Size&labelColor=4682B4&color=black)  ![GitHub license](https://img.shields.io/github/license/hexo141/Wnclient?style=flat-square&logo=github&logoColor=white&label=License&labelColor=4682B4&color=black)  ![GitHub release](https://img.shields.io/github/v/release/hexo141/Wnclient?style=flat-square&logo=github&logoColor=white&label=Release&labelColor=4682B4&color=black)
+## --Language: [Chinese](#Chinese) [English](#English)--
+<a id="Chinese"></a>
 
-![ACGN](http://api.kanzaki.moe/acgnAPI.php)
+[![github](https://img.shields.io/badge/github-hexo141-black?style=flat-square&logo=github&logoColor=white&labelColor=4682B4)](https://github.com/hexo141)  [![mikufans](https://img.shields.io/badge/Mikufans-hexo141-black?style=flat-square&logo=bilibili&logoColor=white&labelColor=ff69b4)](https://space.bilibili.com/3494353628564285)  ![GitHub Repo stars](https://img.shields.io/github/stars/hexo141/Wnclient?style=flat-square&logo=github&logoColor=white&label=Stars&labelColor=4682B4&color=black)  ![GitHub forks](https://img.shields.io/github/forks/hexo141/Wnclient?style=flat-square&logo=github&logoColor=white&label=Forks&labelColor=4682B4&color=black) ![GitHub license](https://img.shields.io/github/license/hexo141/Wnclient?style=flat-square&logo=github&logoColor=white&label=License&labelColor=4682B4&color=black)  ![GitHub release](https://img.shields.io/github/v/release/hexo141/Wnclient?style=flat-square&logo=github&logoColor=white&label=Release&labelColor=4682B4&color=black)
+
+### Download Website: ![Download Website](https://wnclient.wssllhdg.dpdns.org/Website/)
+#### 你会获得哪里些功能: UAC-bypass, Dll_injector, ProcessLauncher, TimeHack等等
 ##### 只是个缝合怪罢了
 ## 环境要求
 - **操作系统**: Windows 系统（推荐）
@@ -33,9 +37,10 @@ python main.py
 **A**: 开发者比较忙碌，正在努力进行代码优化和界面美化工作，并提供中文和英文两种语言的文档。
 
 ---
+<a id="English"></a>
 
 # Wnclient User Guide
-
+#### What features will you get: UAC-bypass, Dll_injector, ProcessLauncher, TimeHack, etc.
 ## Requirements
 - **Operating System**: Windows (recommended)
 - **Python Version**: Python 3.11.4 is recommended
