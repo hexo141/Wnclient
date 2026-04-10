@@ -1,6 +1,6 @@
-Name = "ProcessLauncher"
+Name = "ProcessKiller"
 Version = "1.0.0"
-Description = "Windows Process Launcher with Console"
+Description = "Kill Process with different ways"
 Author = "Wnclient Dev Team"
 Dependence = []
 platforms = ["Windows"]

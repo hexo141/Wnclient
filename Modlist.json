@@ -75,5 +75,12 @@
         "toml": "Mod/ProcessLauncher/Wnclient.toml",
         "Enabled": true,
         "AutoLoad": false
+    },
+    "ProcessKiller": {
+        "path": "Mod/ProcessKiller/ProcessKiller.py",
+        "mappings": "Mod/ProcessKiller/Mappings.json",
+        "toml": "Mod/ProcessKiller/Wnclient.toml",
+        "Enabled": true,
+        "AutoLoad": false
     }
 }

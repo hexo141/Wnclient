@@ -1,0 +1,3 @@
+{
+    "SDP_kill_process_by_pid": {"func": "SDP_kill_process_by_pid","Parameters": {"pid":{"type":"int","isRequired":true}}}
+}

