@@ -1,0 +1,7 @@
+Name = "ProcessLauncher"
+Version = "1.0.0"
+Description = "Windows Process Launcher with GUI Console"
+Author = "User"
+Dependence = []
+platforms = ["Windows"]
+Run_in_the_background = false

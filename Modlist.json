@@ -68,5 +68,12 @@
         "toml": "Mod/WindowStyle/Wnclient.toml",
         "Enabled": true,
         "AutoLoad": false
+    },
+    "ProcessLauncher": {
+        "path": "Mod/ProcessLauncher/ProcessLauncher.py",
+        "mappings": "Mod/ProcessLauncher/Mappings.json",
+        "toml": "Mod/ProcessLauncher/Wnclient.toml",
+        "Enabled": true,
+        "AutoLoad": false
     }
 }
