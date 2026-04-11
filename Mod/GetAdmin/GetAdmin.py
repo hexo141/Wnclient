@@ -18,10 +18,10 @@ def is_admin():
     except:
         return False
 
-def Universal():
+def Universal(args=""):
     if platform.system() == 'Windows':
         if not is_admin():
-            res_code = ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, os.path.join(pathlib.Path(__file__).parent.parent.parent,"main.py"), None, 1)
+            res_code = ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, os.path.join(pathlib.Path(__file__).parent.parent.parent,"main.py") + f" {args}", None, 1)
             if res_code <= 32:
                 lwjgl.error(f"Failed to elevate power, return: {res_code}")
             else:
@@ -154,14 +154,14 @@ def GetSystem_by_Winlogon():
         """Automatically retrieve the PID of the WinLogon process."""
         
         # Method 1: Enumerate processes using EnumProcesses
-        print("[*] Enumerating processes to find WinLogon...")
+        lwjgl.info("[*] Enumerating processes to find WinLogon...")
         
         # Get process list
         process_ids = (wintypes.DWORD * 1024)()
         bytes_returned = wintypes.DWORD()
         
         if not psapi.EnumProcesses(process_ids, ctypes.sizeof(process_ids), ctypes.byref(bytes_returned)):
-            print(f"[!] EnumProcesses failed: {kernel32.GetLastError()}")
+            lwjgl.info(f"[!] EnumProcesses failed: {kernel32.GetLastError()}")
             return None
         
         num_processes = bytes_returned.value // ctypes.sizeof(wintypes.DWORD)
@@ -183,13 +183,13 @@ def GetSystem_by_Winlogon():
                         # Check if it's winlogon.exe
                         filepath = filename.value.lower()
                         if "winlogon.exe" in filepath:
-                            print(f"[+] Found WinLogon process: PID={pid}, Path={filepath}")
+                            lwjgl.info(f"[+] Found WinLogon process: PID={pid}, Path={filepath}")
                             return pid
                 finally:
                     kernel32.CloseHandle(hProc)
         
         # Method 2: Use Toolhelp32Snapshot as fallback
-        print("[*] Attempting to find using Toolhelp32 snapshot...")
+        lwjgl.info("[*] Attempting to find using Toolhelp32 snapshot...")
         
         class PROCESSENTRY32(ctypes.Structure):
             _fields_ = [
@@ -207,7 +207,7 @@ def GetSystem_by_Winlogon():
         
         hSnapshot = kernel32.CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0)
         if hSnapshot == wintypes.HANDLE(-1):
-            print(f"[!] Failed to create process snapshot: {kernel32.GetLastError()}")
+            lwjgl.info(f"[!] Failed to create process snapshot: {kernel32.GetLastError()}")
             return None
         
         try:
@@ -217,7 +217,7 @@ def GetSystem_by_Winlogon():
             if kernel32.Process32FirstW(hSnapshot, ctypes.byref(process_entry)):
                 while True:
                     if "winlogon.exe" in process_entry.szExeFile.lower():
-                        print(f"[+] Found WinLogon process: PID={process_entry.th32ProcessID}, Name={process_entry.szExeFile}")
+                        lwjgl.info(f"[+] Found WinLogon process: PID={process_entry.th32ProcessID}, Name={process_entry.szExeFile}")
                         return process_entry.th32ProcessID
                     
                     if not kernel32.Process32NextW(hSnapshot, ctypes.byref(process_entry)):
@@ -225,7 +225,7 @@ def GetSystem_by_Winlogon():
         finally:
             kernel32.CloseHandle(hSnapshot)
         
-        print("[!] Could not find WinLogon process")
+        lwjgl.info("[!] Could not find WinLogon process")
         return None
     
     try:
@@ -236,21 +236,21 @@ def GetSystem_by_Winlogon():
             try:
                 winlogon_pid = int(input("Auto-retrieval failed. Please enter WinLogon PID: "))
             except ValueError:
-                print("Invalid PID. Please enter a numeric value.")
+                lwjgl.info("Invalid PID. Please enter a numeric value.")
                 return 1
         
-        print(f"[*] Using WinLogon PID: {winlogon_pid}")
+        lwjgl.info(f"[*] Using WinLogon PID: {winlogon_pid}")
         
         # Open the process
         hProc = kernel32.OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, False, winlogon_pid)
         if not hProc:
-            print(f"[!] OpenProcess failed: {kernel32.GetLastError()}")
+            lwjgl.info(f"[!] OpenProcess failed: {kernel32.GetLastError()}")
             return 1
         
         # Open process token
         hToken = wintypes.HANDLE()
         if not advapi32.OpenProcessToken(hProc, TOKEN_QUERY | TOKEN_DUPLICATE, ctypes.byref(hToken)):
-            print(f"[!] OpenProcessToken failed: {kernel32.GetLastError()}")
+            lwjgl.info(f"[!] OpenProcessToken failed: {kernel32.GetLastError()}")
             kernel32.CloseHandle(hProc)
             return 1
         
@@ -264,7 +264,7 @@ def GetSystem_by_Winlogon():
             TokenPrimary, 
             ctypes.byref(hSysToken)
         ):
-            print(f"[!] DuplicateTokenEx failed: {kernel32.GetLastError()}")
+            lwjgl.info(f"[!] DuplicateTokenEx failed: {kernel32.GetLastError()}")
             kernel32.CloseHandle(hToken)
             kernel32.CloseHandle(hProc)
             return 1
@@ -322,11 +322,11 @@ def GetSystem_by_Winlogon():
             ctypes.byref(pi)
         ):
             error_code = kernel32.GetLastError()
-            print(f"[!] CreateProcessWithTokenW failed: {error_code}")
+            lwjgl.info(f"[!] CreateProcessWithTokenW failed: {error_code}")
             return 1
         else:
-            print("[+] Successfully created process using WinLogon token!")
-            print(f"[*] New process PID: {pi.dwProcessId}")
+            lwjgl.info("[+] Successfully created process using WinLogon token!")
+            lwjgl.info(f"[*] New process PID: {pi.dwProcessId}")
             sys.exit(0)
         
         # Cleanup handles
@@ -339,7 +339,7 @@ def GetSystem_by_Winlogon():
         return pi.dwProcessId
         
     except Exception as e:
-        print(f"[!] Unexpected error: {e}")
+        lwjgl.info(f"[!] Unexpected error: {e}")
         import traceback
         traceback.print_exc()
         return None
@@ -347,7 +347,7 @@ def GetSystem_by_Winlogon():
 
 
 def Getit_by_Python():
-    print("Permissions may be incomplete")
+    lwjgl.info("Permissions may be incomplete")
     
 
     SC_MANAGER_CONNECT = 0x0001
@@ -629,11 +629,11 @@ def Getit_by_Python():
         parent_dir = pathlib.Path(__file__).parent.parent.parent
         args = f'/c "cd /d "{parent_dir}" && "{sys.executable}" main.py"'
         
-        print(f"Starting program with TrustedInstaller privileges: {target_exe} {args}\n(by Wnclient)")
+        lwjgl.info(f"Starting program with TrustedInstaller privileges: {target_exe} {args}\n(by Wnclient)")
         
         # 启动TrustedInstaller服务
         if not control_service("TrustedInstaller", "start"):
-            print("Failed to start TrustedInstaller service")
+            lwjgl.info("Failed to start TrustedInstaller service")
             return False
         
         time.sleep(1)
@@ -641,21 +641,22 @@ def Getit_by_Python():
         # 获取TrustedInstaller进程PID
         ti_pid = get_ti_pid()
         if ti_pid == 0:
-            print("TrustedInstaller process not found")
+            lwjgl.info("TrustedInstaller process not found")
             control_service("TrustedInstaller", "stop")
             return False
         
         # 打开TrustedInstaller进程
         hProc = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, False, ti_pid)
         if not hProc:
-            print(f"Failed to open process: {GetLastError()}")
+            lwjgl.info(f"Failed to open process: {GetLastError()}, PID={ti_pid}")
+            lwjgl.info(f"Try to run as SYSTEM instead")
             control_service("TrustedInstaller", "stop")
             return False
         
         # 获取进程令牌
         hToken = wintypes.HANDLE()
         if not OpenProcessToken(hProc, TOKEN_QUERY | TOKEN_DUPLICATE, ctypes.byref(hToken)):
-            print(f"Failed to open process token: {GetLastError()}")
+            lwjgl.info(f"Failed to open process token: {GetLastError()}")
             CloseHandle(hProc)
             control_service("TrustedInstaller", "stop")
             return False
@@ -663,7 +664,7 @@ def Getit_by_Python():
         # 复制令牌
         hSysToken = wintypes.HANDLE()
         if not DuplicateTokenEx(hToken, TOKEN_ALL_ACCESS, None, SecurityImpersonation, TokenPrimary, ctypes.byref(hSysToken)):
-            print(f"Failed to duplicate token: {GetLastError()}")
+            lwjgl.info(f"Failed to duplicate token: {GetLastError()}")
             CloseHandle(hToken)
             CloseHandle(hProc)
             control_service("TrustedInstaller", "stop")
@@ -681,10 +682,10 @@ def Getit_by_Python():
             hSysToken, 0, target_exe, command_line, 0, None, None, 
             ctypes.byref(si), ctypes.byref(pi)
         ):
-            print(f"Startup failed, error code: {GetLastError()}")
+            lwjgl.info(f"Startup failed, error code: {GetLastError()}")
             success = False
         else:
-            print("Startup successful!")
+            lwjgl.info("Startup successful!")
             sys.exit(0)
             CloseHandle(pi.hProcess)
             CloseHandle(pi.hThread)

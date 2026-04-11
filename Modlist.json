@@ -82,5 +82,12 @@
         "toml": "Mod/ProcessKiller/Wnclient.toml",
         "Enabled": true,
         "AutoLoad": false
+    },
+    "Setppl": {
+        "path": "Mod/Setppl/Setppl.py",
+        "mappings": "Mod/Setppl/Mappings.json",
+        "toml": "Mod/Setppl/Wnclient.toml",
+        "Enabled": true,
+        "AutoLoad": false
     }
 }

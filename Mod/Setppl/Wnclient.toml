@@ -1,0 +1,7 @@
+Name = "Setppl"
+Version = "1.0.0"
+Description = "Use ppl to protect wnclient"
+Author = "Wnclient Dev Team"
+Dependence = []
+platforms = ["Windows"]
+Run_in_the_background = false

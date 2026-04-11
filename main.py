@@ -1,16 +1,15 @@
 # /\_/\
 # ( -.-)
 # / >📄
+
+
 import sys
 import json
 import subprocess
 import wnc
 import platform
-import zipfile
 import shutil
 import os
-import psutil
-import Run_As_Admin
 import argparse
 try:
     import toml
@@ -25,49 +24,15 @@ except ImportError as e:
     sys.exit(0)
 
 
-parser = argparse.ArgumentParser(description='A specail client!')
+parser = argparse.ArgumentParser(description='A special client made by python!')
 
 # 添加参数
 parser.add_argument('-command', help='Quick use Command')
 cmd_args = parser.parse_args()
 
-def set_ppl():
-    if platform.system() == 'Windows':
-                if not Run_As_Admin.is_admin():
-                    Run_As_Admin.Run_As_Admin(command="-command set_ppl")
-                else:
-                    lwjgl.info("Unzip the sys file")
-                    try:
-                        with zipfile.ZipFile('Assets/Sys/RTCore64.zip', 'r') as zip_ref:
-                            zip_ref.extractall('./Temp')
-                    except Exception as e:
-                        lwjgl.warning(e)
-                    parent = psutil.Process(os.getpid())
-                    pids = [parent.pid]
-                    for child in parent.children(recursive=True):
-                        pids.append(child.pid)
-                    lwjgl.info("Delete old service if exists")
-                    subprocess.run("sc.exe delete RTCore64")
-                    lwjgl.info("Create an SC service")
-                    subprocess.run(f'sc.exe create RTCore64 type= kernel start= auto binPath= "./Temp/RTCore64.sys" DisplayName= "Micro - Star MSI Afterburner"')
-                    lwjgl.info("Start the service")
-                    subprocess.run("net start RTCore64")
-                    for pid in pids:
-                        lwjgl.info(f"Set the PPL level -> ({pid})")
-                        subprocess.run(f"./PPLcontrol.exe set {pid} PPL WinTcb")
-
-def Getit():
-    if platform.system() == 'Windows':
-        if not Run_As_Admin.is_admin():
-            Run_As_Admin.Run_As_Admin(command="-command Getit")
-        else:
-            print("For example: cmd.exe")
-            subprocess.run(f"./Getit.exe {input("Executable_path: ")}")
 
 
-func_dict = {"set_ppl": set_ppl,
-             "Run_As_Admin":Run_As_Admin.Run_As_Admin,
-             "Getit":Getit,
+func_dict = {
              "reload": wnc.reload_client,
              "modlist": wnc.modlist,
              "help": wnc.help,
